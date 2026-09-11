@@ -32,6 +32,22 @@ Already working, with nothing to wire up:
 
 - **Node.js** 18 or later
 - **PostgreSQL**, running, with a user allowed to create databases
+- **Redis**, running — sign-in sessions are kept there
+
+```bash
+# macOS
+brew services start redis
+
+# Linux
+sudo systemctl start redis
+
+# Windows — Redis has no native build, so Docker or WSL
+docker run -d -p 6379:6379 redis
+```
+
+Without Redis, login appears to work and then every request is refused as
+"Invalid or expired token". The sign-in service checks for it at startup and
+refuses to start rather than let you meet that message.
 
 Works on macOS, Linux and Windows. Nothing it generates depends on a unix
 shell.

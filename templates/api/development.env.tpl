@@ -24,6 +24,11 @@ DB_API=__NAME___api
 AUTH_DB_NAME=__NAME___auth
 
 # ── Sign-in service ──
+#
+# Sessions are kept in REDIS, which must be running. Defaults to
+# localhost:6379; set REDIS_HOST / REDIS_PORT to point elsewhere. Without it
+# the service refuses to start and says so — rather than letting every login
+# succeed and every request afterwards fail as "Invalid or expired token".
 AUTH_PORT=__AUTH_PORT__
 AUTH_JWT_SECRET=__JWT_SECRET__
 
