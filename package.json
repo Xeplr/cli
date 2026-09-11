@@ -1,6 +1,6 @@
 {
   "name": "@xeplr/cli",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Creates a working xeplr application — API, sign-in and UI — from a few answers.",
   "license": "MIT",
   "author": "xeppie <admin@xeplr.com>",
