@@ -1,0 +1,39 @@
+{
+  "name": "@xeplr/cli",
+  "version": "0.1.0",
+  "description": "Creates a working xeplr application — API, sign-in and UI — from a few answers.",
+  "license": "MIT",
+  "author": "xeppie <admin@xeplr.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Xeplr/xeplr-cli.git"
+  },
+  "homepage": "https://github.com/Xeplr/xeplr-cli#readme",
+  "keywords": [
+    "xeplr",
+    "scaffold",
+    "generator",
+    "cli"
+  ],
+  "bin": {
+    "xeplr": "./bin/xeplr.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "templates/",
+    "README.md"
+  ],
+  "dependencies": {
+    "@xeplr/utils": "^1.0.7"
+  }
+}

@@ -1,0 +1,47 @@
+# __NAME__ — development settings.
+#
+# Ports: __UI_PORT__ ui · __AUTH_PORT__ auth · __API_PORT__ api
+
+NODE_ENV=development
+LOG_DIR=./logs
+
+# ── API service ──
+__PREFIX___PORT=__API_PORT__
+
+# ── Shared ──
+# Locks and unlocks the database connections below. Generated for you; keep it.
+# Lose it and the connection strings below have to be made again.
+ENCRYPTION_KEY=__ENCRYPTION_KEY__
+
+__CONNECTION_NOTE__
+__PREFIX___CONNECTION=__DB_CONNECTION__
+AUTH_DB_CONNECTION_INFO_ENCRYPTED=__DB_CONNECTION__
+
+# ── Databases ──
+# Two of them: accounts in one, your own data in the other. Both are created
+# for you the first time you run the setup.
+DB_API=__NAME___api
+AUTH_DB_NAME=__NAME___auth
+
+# ── Sign-in service ──
+AUTH_PORT=__AUTH_PORT__
+AUTH_JWT_SECRET=__JWT_SECRET__
+
+# Where the sign-in service is. Your API asks it to check every token.
+AUTH_URL=http://localhost:__AUTH_PORT__
+
+# Your own sign-in setup files — menu entries and anything else this app adds.
+XEPLR_AUTH_MIGRATIONS=./migrations-auth
+
+# ── The first account you sign in with ──
+# Created for you when you set up the database. Change the password here and
+# delete the account to reset it.
+AUTH_SUPER_ADMIN_EMAIL=__ADMIN_EMAIL__
+AUTH_SUPER_ADMIN_PASSWORD=__ADMIN_PASSWORD__
+
+# ── Links that go out in emails ──
+# FULLY QUALIFIED, and they point at UI pages rather than at the API. The
+# sign-in service builds these links and appends the token as ?token=... — an
+# email template can carry a token as a value but cannot build an address.
+AUTH_ACTIVATION_URL=http://localhost:__UI_PORT__/auth/activate
+AUTH_INVITE_URL=http://localhost:__UI_PORT__/auth/accept-invite

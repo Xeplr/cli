@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build artefacts from `npm pack`
+*.tgz
+
+# Local env files — never committed. The templates ship their own copies under
+# .tpl names, which is why those are NOT matched here.
+.env
+*.local.env
+development.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Coverage
+coverage/
+.nyc_output/

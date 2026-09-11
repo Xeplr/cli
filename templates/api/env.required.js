@@ -1,0 +1,29 @@
+/**
+ * Mandatory env vars for the __NAME__ API process. Checked at startup
+ * (bin/www) and at build (`npm run check-env`).
+ *
+ * SPREAD EACH LIBRARY'S OWN LIST rather than re-typing its variable names.
+ * The names belong to the library, so a new requirement it adds lands here on
+ * the next upgrade with nothing to remember — and nothing drifts out of step.
+ * Only APP-SPECIFIC names are written out literally below.
+ */
+module.exports = [
+  // ENCRYPTION_KEY, AUTH_JWT_SECRET, AUTH_PORT, AUTH_DB_NAME,
+  // XEPLR_AUTH_MIGRATIONS
+  ...require('@xeplr/auth').requiredEnv,
+
+  // ── this app's own ──
+  '__PREFIX___PORT',
+
+  // Where the sign-in service is. createApp gates every route by default and
+  // validates against this, so a missing one already stops the boot with a
+  // named variable — listing it here just moves the same complaint to
+  // `npm run check-env`, before anything starts at all.
+  'AUTH_URL',
+
+  // This app's own database. NEVER defaulted: a wrong-but-present name boots
+  // clean, migrates, serves traffic and reads as EMPTY DATA rather than as an
+  // error — the most expensive way for this to go wrong.
+  'DB_API',
+  '__PREFIX___CONNECTION'
+];
