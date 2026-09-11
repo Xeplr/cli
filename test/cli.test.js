@@ -208,3 +208,33 @@ test('a name that would break a folder, a package or a database is refused', fun
     assert.ok(questions.NAME_RE.test(good), JSON.stringify(good) + ' should be allowed');
   });
 });
+
+// ── runs on Windows too ─────────────────────────────────────────────────────
+
+test('no generated script uses a unix-only env prefix', function () {
+  // `NODE_ENV=development node ...` is shell syntax that cmd.exe does not
+  // have. It answers "'NODE_ENV' is not recognized as an internal or external
+  // command" and the app never starts — on the very first thing a new user
+  // types. Anything that needs a variable set must do it in code, or use a
+  // cross-platform runner.
+  ['api', 'ui'].forEach(function (part) {
+    var pkg = require('../templates/' + part + '/package.json');
+    Object.keys(pkg.scripts || {}).forEach(function (name) {
+      assert.doesNotMatch(
+        pkg.scripts[name],
+        /(^|&&\s*)[A-Z_]+=/,
+        part + ' script "' + name + '" sets an env var the unix way: ' + pkg.scripts[name]
+      );
+    });
+  });
+});
+
+test('no generated script shells out to sh', function () {
+  ['api', 'ui'].forEach(function (part) {
+    var pkg = require('../templates/' + part + '/package.json');
+    Object.keys(pkg.scripts || {}).forEach(function (name) {
+      assert.doesNotMatch(pkg.scripts[name], /\bsh -c\b/,
+        part + ' script "' + name + '" uses sh, which Windows does not have');
+    });
+  });
+});

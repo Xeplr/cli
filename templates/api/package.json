@@ -14,7 +14,7 @@
     "migrate:auth": "dotenv -e development.env -- xeplr-auth-migrate up --connection-env AUTH_DB_CONNECTION_INFO_ENCRYPTED",
     "migrate:up": "dotenv -e development.env -- xeplr-migrate up --dir ./migrations --connectionName api --connection-env __PREFIX___CONNECTION",
     "start-auth": "dotenv -e ./development.env -- xeplr-auth-server",
-    "start-api": "NODE_ENV=development node ./bin/www"
+    "start-api": "node ./bin/www"
   },
   "dependencies": {
     "@xeplr/auth": "^1.1.0",

@@ -33,6 +33,9 @@ Already working, with nothing to wire up:
 - **Node.js** 18 or later
 - **PostgreSQL**, running, with a user allowed to create databases
 
+Works on macOS, Linux and Windows. Nothing it generates depends on a unix
+shell.
+
 ## Then
 
 ```bash
