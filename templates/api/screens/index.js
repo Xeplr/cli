@@ -10,12 +10,14 @@
 // table to match. Editing a .screen.json later changes nothing for an
 // already-published screen.
 //
-// ADD AN ENTITY:
+// ADD ONE: follow "Create a new UI" in the project's CLAUDE.md — or ask Claude
+// to, with the prompt there. Every form's folder holds the same files:
 //
-//   npx xeplr-factory screens screens/project/project.entity.json -o screens/project
-//
-// then list its two screens and its hooks below, and add a page and a menu
-// entry for it (see the UI's src/pages/Tasks.jsx and migrations-auth/).
+//   screens/<form>/<form>.entity.json       its name and fields
+//   screens/<form>/<form>-list.screen.json  the list
+//   screens/<form>/<form>-edit.screen.json  the add / edit form
+//   screens/<form>/<form>.hooks.js          server hooks — save / get / delete
+//   screens/<form>/<form>.model.js          server model — getters / setters
 
 module.exports = {
   // Publish order is worked out for you: a table before the dropdowns that
@@ -28,5 +30,10 @@ module.exports = {
   // Your own code around save / get / delete, per screen — see task/task.hooks.js.
   hooks: {
     task_edit: require('./task/task.hooks')
-  }
+  },
+
+  // How each table's values are shaped — see task/task.model.js.
+  models: [
+    require('./task/task.model')
+  ]
 };

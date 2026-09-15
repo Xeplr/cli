@@ -58,9 +58,10 @@ async function start() {
   // time has no connection at all until this has finished.
   var knex = await require('../db/setup');
 
-  // The screens. A hooks file with a typo ("beforeSave") stops startup here,
-  // rather than silently never running.
-  await factory.init({ knex: knex, hooks: screens.hooks });
+  // The screens, their hooks and their models. A hooks file with a typo
+  // ("beforeSave") or a malformed model stops startup here, rather than
+  // silently never running.
+  await factory.init({ knex: knex, hooks: screens.hooks, models: screens.models });
 
   // Screens never published yet are published now, creating their tables.
   // Ones already published are left alone — the Forms page owns them.

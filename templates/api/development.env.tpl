@@ -29,6 +29,11 @@ AUTH_DB_NAME=__NAME___auth
 # localhost:6379; set REDIS_HOST / REDIS_PORT to point elsewhere. Without it
 # the service refuses to start and says so — rather than letting every login
 # succeed and every request afterwards fail as "Invalid or expired token".
+#
+# REDIS_PREFIX keeps this app's keys apart from any other app on the same
+# Redis. Required, and unique per app: two apps sharing one see each other's
+# menus and permissions.
+REDIS_PREFIX=__NAME__:
 AUTH_PORT=__AUTH_PORT__
 AUTH_JWT_SECRET=__JWT_SECRET__
 

@@ -9,7 +9,7 @@
  */
 module.exports = [
   // ENCRYPTION_KEY, AUTH_JWT_SECRET, AUTH_PORT, AUTH_DB_NAME,
-  // XEPLR_AUTH_MIGRATIONS
+  // XEPLR_AUTH_MIGRATIONS, AUTH_SUPER_ADMIN_EMAIL / _PASSWORD, REDIS_PREFIX
   ...require('@xeplr/auth').requiredEnv,
 
   // ── this app's own ──

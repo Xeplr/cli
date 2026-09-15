@@ -1,6 +1,9 @@
 // The panel beside the sample. It is here so the first thing anybody builds is
 // explained where they are looking, rather than in a document they have to go
 // and find.
+// The same prompt as in CLAUDE.md. Replace the form and its fields.
+const PROMPT = 'Create a new UI for farming departments. One record is a farming department with: Name (required), Region (dropdown: North, South, East, West), Area in acres (number, at least 0), Started on (date), Notes (long text). Show Name, Region and Area in the list. Follow "Create a new UI" in CLAUDE.md.'
+
 export default function TasksHelp() {
   return (
     <aside className="app-help">
@@ -15,42 +18,26 @@ export default function TasksHelp() {
 
       <h3>Change it</h3>
       <p>
-        Open <strong>Forms</strong> in the side rail and <strong>Design form</strong>
-        on Tasks. Add a field, move one, change a label or a colour — then
-        <strong> Publish</strong>. The table gains its new column as you publish.
+        Open <strong>Forms</strong> in the side rail and{' '}
+        <strong>Design form</strong> on Tasks. Add a field, move one, change a
+        label or a colour — then <strong>Publish</strong>. The table gains its
+        new column as you publish.
       </p>
 
-      <h3>Add your own</h3>
+      <h3>Ask Claude for one</h3>
+      <p>In this project, give Claude a prompt like:</p>
+      <pre className="app-help-prompt">{PROMPT}</pre>
       <p>
-        <strong>Forms → New form</strong>: name it, design it, publish it, open it.
-        Or have Claude write one:
+        It follows <code>CLAUDE.md</code> — the screens, the page with its hooks,
+        the server hooks and model, the menu entry — and the API creates the table.
       </p>
-      <ol className="app-help-steps">
-        <li>
-          <strong>Describe it</strong>
-          <code>api/screens/project/project.entity.json</code>
-          <span>Its name and fields — copy <code>task/task.entity.json</code>.</span>
-        </li>
-        <li>
-          <strong>Make its screens</strong>
-          <code>npx xeplr-factory screens screens/project/project.entity.json -o screens/project</code>
-          <span>From the api folder. Then list them in <code>api/screens/index.js</code>.</span>
-        </li>
-        <li>
-          <strong>The page</strong>
-          <code>ui/src/pages/Projects.jsx</code>
-          <span>Copy <code>Tasks.jsx</code> and load <code>project_list</code>.</span>
-        </li>
-        <li>
-          <strong>The menu entry</strong>
-          <code>api/migrations-auth/000N_projects_menu.sql</code>
-          <span>
-            The side-rail item appears only if its name exists in the database,
-            spelled exactly the same.
-          </span>
-        </li>
-      </ol>
-      <p>Restart the API and the new table is created for you.</p>
+
+      <h3>Or by hand</h3>
+      <p>
+        <strong>Forms → New form</strong>: name it, design it, publish it, open
+        it — no code. The full steps for a form with its own page, hooks and
+        model are in <code>CLAUDE.md</code>, under "Create a new UI".
+      </p>
 
       <h3>More than saving</h3>
       <p>

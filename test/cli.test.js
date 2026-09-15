@@ -107,6 +107,14 @@ test('with no connection given, the settings are blank and say how to fix it', f
   assert.match(env, /db:encrypt/, 'must name the command that fills it in');
 });
 
+test('the app gets a Redis prefix of its own, never the shared default', function () {
+  var dir = path.join(tmpdir(), 'demo');
+  generate.generate(answers(), dir);
+  var env = fs.readFileSync(path.join(dir, 'api', 'development.env'), 'utf8');
+
+  assert.match(env, /^REDIS_PREFIX=demo:$/m);
+});
+
 test('with a connection given, both settings carry it', function () {
   var dir = path.join(tmpdir(), 'demo');
   generate.generate(answers({ connection: 'ENCRYPTED-VALUE' }), dir);
@@ -378,4 +386,21 @@ test('front-end hooks: the task module holds them, every method calling super, a
   var tasks = fs.readFileSync(path.join(dir, 'ui/src/pages/Tasks.jsx'), 'utf8');
   assert.match(tasks, /import \{ taskHooks \} from '\.\/EditTask\.jsx'/);
   assert.match(tasks, /hooks=\{taskHooks\}/);
+});
+
+test('a new UI is described for Claude: CLAUDE.md with the recipe and the prompt, and the task model is wired in', function () {
+  var dir = path.join(tmpdir(), 'demo');
+  generate.generate(answers(), dir);
+  var md = fs.readFileSync(path.join(dir, 'CLAUDE.md'), 'utf8');
+  assert.match(md, /^# demo/);
+  ['## Create a new UI', '.entity.json', '--no-pages', 'api/screens/index.js', 'Edit<Form>.jsx', 'drawerItems', 'migrate:auth', '.model.js', '.hooks.js', '### The prompt', 'factory.table('].forEach(function (s) {
+    assert.ok(md.indexOf(s) !== -1, 'CLAUDE.md mentions ' + s);
+  });
+  var help = fs.readFileSync(path.join(dir, 'ui/src/pages/TasksHelp.jsx'), 'utf8');
+  var prompt = /### The prompt\n\n> (.*)\n/.exec(md)[1].replace(/\*\*/g, '');
+  assert.ok(help.indexOf(prompt) !== -1, 'the sample shows the same prompt as CLAUDE.md');
+  var screens = fs.readFileSync(path.join(dir, 'api/screens/index.js'), 'utf8');
+  assert.match(screens, /require\('\.\/task\/task\.model'\)/);
+  assert.match(fs.readFileSync(path.join(dir, 'api/bin/www'), 'utf8'), /models: screens\.models/);
+  assert.match(fs.readFileSync(path.join(dir, 'api/screens/task/task.model.js'), 'utf8'), /class TaskModel extends FactoryModel/);
 });

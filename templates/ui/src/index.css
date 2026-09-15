@@ -322,3 +322,14 @@ body { margin: 0; }
   border-radius: 8px;
   overflow: hidden;
 }
+
+.app-help-prompt {
+  white-space: pre-wrap;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 10px 12px;
+  margin: 8px 0;
+  border-radius: 6px;
+  background: var(--xeplr-bg-tertiary);
+  border: 1px solid var(--xeplr-border-primary);
+}

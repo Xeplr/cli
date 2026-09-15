@@ -38,6 +38,14 @@ Already working, with nothing to wire up:
   and choosing one is the first screen after signing in.
 - **A welcome screen** that checks it can reach everything and tells you which
   files to change first.
+- **A `CLAUDE.md`** that tells Claude how to create a new UI in this app — the
+  screens, the page with its front-end hooks, the server hooks and model, the
+  route and menu entry — and a ready prompt (also shown beside the sample):
+
+  > Create a new UI for farming departments. One record is a farming department
+  > with: Name (required), Region (dropdown: North, South, East, West), Area in
+  > acres (number, at least 0), Started on (date), Notes (long text). Show Name,
+  > Region and Area in the list. Follow "Create a new UI" in CLAUDE.md.
 
 ## Before you start
 
