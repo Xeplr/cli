@@ -31,6 +31,7 @@
     "bin/",
     "lib/",
     "templates/",
+    "templates-tenancy/",
     "README.md"
   ],
   "dependencies": {

@@ -1,6 +1,7 @@
 var createApp = require('@xeplr/base-apis/express');
 var factory = require('@xeplr/factory');
 var routes = require('./routes');
+__MT_APP_REQUIRE__
 
 // No `|| __API_PORT__` fallback — the port is required in env.required.js, so a
 // default could only ever fire in a process that skipped that check.
@@ -17,8 +18,10 @@ module.exports = function buildApp(extraRoutes) {
       publicPaths: ['/health']
     },
     log: { logDir: process.env.LOG_DIR || './logs' },
+__MT_APP_MIDDLEWARE__
     routes: Object.assign({}, extraRoutes || {}, {
       '/': routes,
+__MT_APP_ROUTES__
 
       // THE SCREENS — every entity made with the Designer, one set of routes:
       //   /api/factory/screens/...   designs: load, save draft, publish
@@ -28,7 +31,10 @@ module.exports = function buildApp(extraRoutes) {
       // it ("Save factory record", "Publish factory screen", ...). Granted to
       // Super Admin and CompanyAdmin (everything), Creator (use the screens) and
       // Viewer (read) by node_modules/@xeplr/factory/migrations-auth.
-      '/api': factory.router({ access: true })
+      '/api': factory.router({
+        access: true,
+__MT_FACTORY_AUTH__
+      })
     })
   });
 };

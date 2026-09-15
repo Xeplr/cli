@@ -290,10 +290,55 @@ test('the task sample is factory screens, published on startup and guarded', fun
 
   var www = fs.readFileSync(path.join(dir, 'api', 'bin', 'www'), 'utf8');
   assert.match(www, /factory\.publishScreens\(screens\.documents\)/);
-  assert.match(fs.readFileSync(path.join(dir, 'api', 'app.js'), 'utf8'), /factory\.router\(\{ access: true \}\)/);
+  assert.match(fs.readFileSync(path.join(dir, 'api', 'app.js'), 'utf8'), /factory\.router\(\{\s*access: true/);
   assert.match(fs.readFileSync(path.join(dir, 'api', 'development.env'), 'utf8'), /XEPLR_AUTH_MIGRATIONS=\.\/node_modules\/@xeplr\/factory\/migrations-auth,\.\/migrations-auth/);
   var uiPkg = JSON.parse(fs.readFileSync(path.join(dir, 'ui', 'package.json'), 'utf8'));
   ['@xeplr/ui-factory', '@xeplr/ui-canvas', '@xeplr/ui-table', '@tanstack/react-table'].forEach(function (dep) {
     assert.ok(uiPkg.dependencies[dep], 'ui depends on ' + dep);
   });
+});
+
+// ── tenancy ─────────────────────────────────────────────────────────────────
+
+test('tenancy levels: every name derived once, and bad answers refused', function () {
+  var levels = questions.tenancyLevels('Company, business unit');
+  assert.deepStrictEqual(levels[1], { key: 'l2', label: 'Business unit', name: 'businessUnitId', header: 'x-business-unit-id', table: 'business_units' });
+  assert.strictEqual(questions.tenancyLevels('category')[0].table, 'categories');
+  assert.throws(function () { questions.tenancyLevels('a1'); }, /letters and spaces/);
+  assert.throws(function () { questions.tenancyLevels('one, two, three, four, five'); }, /At most four/);
+  assert.throws(function () { questions.tenancyLevels('company, company'); }, /different name/);
+});
+
+test('without tenancy the project has no trace of it', function () {
+  var dir = path.join(tmpdir(), 'demo');
+  var result = generate.generate(answers({ tenancy: [] }), dir);
+  assert.ok(result.written.every(function (f) { return !/tenan|SelectScope|switch_menu/i.test(f); }), 'no tenancy files');
+  result.written.forEach(function (rel) {
+    if (/\.(svg|png)$/.test(rel)) return;
+    assert.doesNotMatch(fs.readFileSync(path.join(dir, rel), 'utf8'), /registerMTs\(|mtMiddleware|ScopeGate|memberGate/, rel);
+  });
+});
+
+test('with tenancy: levels registered on both sides, tables, picker first, membership checked', function () {
+  var dir = path.join(tmpdir(), 'demo');
+  var result = generate.generate(answers({ tenancy: questions.tenancyLevels('company, workspace') }), dir);
+  var read = function (rel) { return fs.readFileSync(path.join(dir, rel), 'utf8'); };
+
+  var api = JSON.stringify(require(path.join(dir, 'api', 'tenancy.js')).slots);
+  assert.strictEqual(api, '{"l1":{"name":"companyId","header":"x-company-id"},"l2":{"name":"workspaceId","header":"x-workspace-id"}}');
+  assert.match(read('ui/src/tenancy.js'), /"header": "x-workspace-id"/);
+  assert.match(read('api/db/setup.js'), /registerMTs\(require\('\.\.\/tenancy'\)\.slots\)/);
+  assert.match(read('ui/src/main.jsx'), /registerMTs\(tenancy\.slots\)/);
+  assert.match(read('api/app.js'), /middleware: \[mtMiddleware\(\)\]/);
+  assert.match(read('api/app.js'), /auth: tenants\.memberGate/);
+  assert.match(read('api/migrations/0001_tenants.sql'), /CREATE TABLE IF NOT EXISTS "companies"[\s\S]*CREATE TABLE IF NOT EXISTS "workspaces"/);
+  assert.match(read('ui/src/App.jsx'), /<ProtectedRoute><ScopeGate><Shell \/><\/ScopeGate><\/ProtectedRoute>/);
+  assert.match(read('ui/src/App.jsx'), /name: 'Switch company'/);
+  assert.match(read('api/migrations-auth/0004_switch_menu.sql'), /'Switch company'/);
+  // Nothing left unfilled, and the JS parses.
+  result.written.forEach(function (rel) {
+    if (/\.(svg|png)$/.test(rel)) return;
+    assert.doesNotMatch(read(rel), /__[A-Z][A-Z0-9_]*[A-Z0-9]__/, rel);
+  });
+  require(path.join(dir, 'api', 'tenancy.js'));
 });

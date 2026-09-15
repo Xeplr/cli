@@ -1,7 +1,7 @@
 # @xeplr/cli
 
-Creates a working xeplr application — an API, sign-in, and a UI — from four
-questions.
+Creates a working xeplr application — an API, sign-in, and a UI — from a few
+questions, installs it, and sets up its databases.
 
 ```bash
 npx @xeplr/cli new myapp
@@ -23,8 +23,18 @@ Already working, with nothing to wire up:
 - **A guarded API** — every address needs a valid token. An address you want
   open is named explicitly; there is no way to leave the whole thing public by
   forgetting.
-- **A sample form** — a table, a model, one line of routing, and a page, with
-  instructions beside it showing how to add your own.
+- **A sample built with the screen designer** — a task list whose New and Edit
+  open the task form in a popup, saving as you type into an ordinary `tasks`
+  table. Neither is written by hand: both are screens
+  ([`@xeplr/ui-factory`](https://www.npmjs.com/package/@xeplr/ui-factory)),
+  published when the API first starts.
+- **A Designer page** — move, add and restyle fields, then Publish; the table
+  gains its new columns as you do. Only the admin roles see it, and the API
+  refuses everyone else.
+- **Multi-tenancy, if you ask for it** — companies (or companies and
+  workspaces, up to four levels). Every row is stamped with the one it was made
+  in, every read sees only its rows, membership is checked on every request,
+  and choosing one is the first screen after signing in.
 - **A welcome screen** that checks it can reach everything and tells you which
   files to change first.
 
@@ -54,19 +64,22 @@ shell.
 
 ## Then
 
-```bash
-cd myapp/api
-npm install
-npm run setup        # creates both databases and their tables
-npm run start-auth   # sign-in
-npm run start-api    # your API
+The installer has already run `npm install` in both halves and — when you gave
+the database connection — `npm run setup`, which creates both databases, the
+sign-in tables and the permissions. Start it:
 
-cd ../ui
-npm install
-npm run dev
+```bash
+cd myapp/api && npm run start-auth   # sign-in
+cd myapp/api && npm run start-api    # your API — publishes the sample screens on first start
+cd myapp/ui  && npm run dev          # the app
 ```
 
 Open the UI and sign in with the account you named.
+
+`xeplr new myapp --no-install` only writes the files; then run `npm install` in
+`api` and `ui`, and `npm run setup` in `api`, yourself. If set-up stops part
+way (Postgres not running, say), the installer says which step and the command
+to run again.
 
 ## Changing the database connection later
 
@@ -106,6 +119,8 @@ no defaults, ever.
 | Port decade | three consecutive ports — ui, sign-in, api |
 | Super admin email | the account you sign in with |
 | Super admin password | its password |
+| Multi-tenant? | no — or the levels, outermost first: `company`, `company, workspace` |
+| Database connection | host, port, user, password — or skip, and fill it in later |
 
 Encryption keys and signing secrets are **generated, never asked**.
 

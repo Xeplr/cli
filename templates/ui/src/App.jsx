@@ -4,6 +4,7 @@ import { authRoutes, authPath, NavPage, ProtectedRoute } from '@xeplr/ui-account
 import Home from './pages/Home.jsx'
 import Tasks from './pages/Tasks.jsx'
 import Designer from './pages/Designer.jsx'
+__MT_APP_UI_IMPORTS__
 
 // The rail is ICON-ONLY when collapsed, so a drawer item without one is
 // invisible until somebody widens the rail. Same 24x24 stroke language the
@@ -24,6 +25,7 @@ const DesignerIcon = (
   </svg>
 )
 
+__MT_SWITCH_ICON__
 const HomeIcon = (
   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -53,7 +55,8 @@ function Shell() {
     { name: 'Home', icon: HomeIcon, clickHandler: () => navigate('/home') },
     { name: 'Tasks', icon: TasksIcon, clickHandler: () => navigate('/tasks') },
     // Shown only to roles given the "Designer" menu (migrations-auth/0003).
-    { name: 'Designer', icon: DesignerIcon, clickHandler: () => navigate('/designer') }
+    { name: 'Designer', icon: DesignerIcon, clickHandler: () => navigate('/designer') },
+__MT_DRAWER_ITEM__
   ], [navigate])
 
   return (
@@ -83,7 +86,8 @@ export default function App() {
           our own chrome. */}
       {authRoutes({}, { layout: <Shell /> })}
 
-      <Route element={<ProtectedRoute><Shell /></ProtectedRoute>}>
+__MT_SELECT_ROUTE__
+      <Route element={<ProtectedRoute>__MT_GATE_OPEN__<Shell />__MT_GATE_CLOSE__</ProtectedRoute>}>
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<Home />} />
         <Route path="/tasks" element={<Tasks />} />

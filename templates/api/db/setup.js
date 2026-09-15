@@ -2,6 +2,7 @@
 // wire the models to it. Exports the connection promise, awaited by callers
 // that need it ready.
 var { getConnection } = require('@xeplr/db');
+__MT_DB_REGISTER__
 
 // No `|| '__NAME___api'` fallback. DB_API is required at startup
 // (env.required.js), so a default could only ever fire in a process that
