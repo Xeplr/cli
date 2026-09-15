@@ -28,9 +28,10 @@ Already working, with nothing to wire up:
   table. Neither is written by hand: both are screens
   ([`@xeplr/ui-factory`](https://www.npmjs.com/package/@xeplr/ui-factory)),
   published when the API first starts.
-- **A Designer page** — move, add and restyle fields, then Publish; the table
-  gains its new columns as you do. Only the admin roles see it, and the API
-  refuses everyone else.
+- **A Forms page** for Super Admin — every form in the app; make a new one by
+  hand (no Claude needed), design its form and its list, publish (which creates
+  or changes its table), open it. Nobody else sees it, and the API refuses
+  everyone else.
 - **Multi-tenancy, if you ask for it** — companies (or companies and
   workspaces, up to four levels). Every row is stamped with the one it was made
   in, every read sees only its rows, membership is checked on every request,

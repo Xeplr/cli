@@ -15,12 +15,16 @@ export default function TasksHelp() {
 
       <h3>Change it</h3>
       <p>
-        Open <strong>Designer</strong> in the side rail. Add a field, move one,
-        change a label or a colour — then <strong>Publish</strong>. The table
-        gains its new column as you publish.
+        Open <strong>Forms</strong> in the side rail and <strong>Design form</strong>
+        on Tasks. Add a field, move one, change a label or a colour — then
+        <strong> Publish</strong>. The table gains its new column as you publish.
       </p>
 
       <h3>Add your own</h3>
+      <p>
+        <strong>Forms → New form</strong>: name it, design it, publish it, open it.
+        Or have Claude write one:
+      </p>
       <ol className="app-help-steps">
         <li>
           <strong>Describe it</strong>
@@ -60,7 +64,7 @@ export default function TasksHelp() {
         <li>
           Once a screen is published, the <em>database</em> holds its design.
           Editing its <code>.screen.json</code> afterwards changes nothing — use
-          the Designer.
+          Forms.
         </li>
         <li>
           A new menu entry is remembered for ten minutes. Restart the sign-in

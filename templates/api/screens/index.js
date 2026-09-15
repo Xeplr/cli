@@ -6,7 +6,7 @@
 //
 // On startup (bin/www) every screen here that has never been published is
 // published — which creates its table. After that the DATABASE holds the
-// design: change it in the app's Designer page, where Publish changes the
+// design: change it on the app's Forms page, where Publish changes the
 // table to match. Editing a .screen.json later changes nothing for an
 // already-published screen.
 //

@@ -63,7 +63,7 @@ async function start() {
   await factory.init({ knex: knex, hooks: screens.hooks });
 
   // Screens never published yet are published now, creating their tables.
-  // Ones already published are left alone — the Designer owns them.
+  // Ones already published are left alone — the Forms page owns them.
   var published = await factory.publishScreens(screens.documents);
   if (published.published.length) console.log('[api] published screens: ' + published.published.join(', '));
 

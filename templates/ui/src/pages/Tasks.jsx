@@ -2,7 +2,7 @@
 // where it saves itself as you type; there is no Save button.
 //
 // Nothing about tasks is written in this file. The list and the form are
-// SCREENS, designed in the Designer page and stored by the API; this page only
+// SCREENS, designed on the Forms page and stored by the API; this page only
 // loads the published "task_list" and hands it the calls it needs.
 import { useEffect, useState } from 'react'
 import { FactoryScreen } from '@xeplr/ui-factory'

@@ -59,8 +59,8 @@ export default function Home() {
           sample logo, in the top bar and the side rail.
         </li>
         <li>
-          <strong>Designer</strong>, in the side rail — change the sample task
-          screens, or see how they are made. Publish changes the table too.
+          <strong>Forms</strong>, in the side rail — make a new form, or change the
+          sample task screens. Publish creates or changes the table too.
         </li>
         <li>
           <code>src/App.jsx</code> — add your own pages, and the side-rail items

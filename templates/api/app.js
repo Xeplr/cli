@@ -1,7 +1,12 @@
 var createApp = require('@xeplr/base-apis/express');
 var factory = require('@xeplr/factory');
 var routes = require('./routes');
+var access = require('./routes/access');
 __MT_APP_REQUIRE__
+
+// Every screen route first checks the caller may use the request's
+// __MT_MEMBER_NOUN__.
+var memberGate = __MT_MEMBER_GATE__;
 
 // No `|| __API_PORT__` fallback — the port is required in env.required.js, so a
 // default could only ever fire in a process that skipped that check.
@@ -23,7 +28,7 @@ __MT_APP_MIDDLEWARE__
       '/': routes,
 __MT_APP_ROUTES__
 
-      // THE SCREENS — every entity made with the Designer, one set of routes:
+      // THE SCREENS — every form, one set of routes:
       //   /api/factory/screens/...   designs: load, save draft, publish
       //   /api/factory/records/...   a screen's records: list, one, save, delete
       //
@@ -33,7 +38,13 @@ __MT_APP_ROUTES__
       // Viewer (read) by node_modules/@xeplr/factory/migrations-auth.
       '/api': factory.router({
         access: true,
-__MT_FACTORY_AUTH__
+        auth: {
+          view: memberGate,
+          write: memberGate,
+          // Designing, new forms and publishing change tables: Super Admin
+          // only (routes/access.js).
+          design: [memberGate, access.superAdminOnly]
+        }
       })
     })
   });

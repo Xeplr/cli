@@ -3,7 +3,9 @@ import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom'
 import { authRoutes, authPath, NavPage, ProtectedRoute } from '@xeplr/ui-account'
 import Home from './pages/Home.jsx'
 import Tasks from './pages/Tasks.jsx'
-import Designer from './pages/Designer.jsx'
+import Forms from './pages/Forms.jsx'
+import FormDesigner from './pages/FormDesigner.jsx'
+import FormRecords from './pages/FormRecords.jsx'
 __MT_APP_UI_IMPORTS__
 
 // The rail is ICON-ONLY when collapsed, so a drawer item without one is
@@ -17,7 +19,7 @@ const TasksIcon = (
   </svg>
 )
 
-const DesignerIcon = (
+const FormsIcon = (
   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -54,8 +56,8 @@ function Shell() {
   const drawerItems = useMemo(() => [
     { name: 'Home', icon: HomeIcon, clickHandler: () => navigate('/home') },
     { name: 'Tasks', icon: TasksIcon, clickHandler: () => navigate('/tasks') },
-    // Shown only to roles given the "Designer" menu (migrations-auth/0003).
-    { name: 'Designer', icon: DesignerIcon, clickHandler: () => navigate('/designer') },
+    // Super Admin only — the "Forms" menu (migrations-auth/0003).
+    { name: 'Forms', icon: FormsIcon, clickHandler: () => navigate('/forms') },
 __MT_DRAWER_ITEM__
   ], [navigate])
 
@@ -91,7 +93,9 @@ __MT_SELECT_ROUTE__
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<Home />} />
         <Route path="/tasks" element={<Tasks />} />
-        <Route path="/designer" element={<Designer />} />
+        <Route path="/forms" element={<Forms />} />
+        <Route path="/forms/:form" element={<FormRecords />} />
+        <Route path="/forms/:form/design/:part" element={<FormDesigner />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/auth/login" replace />} />

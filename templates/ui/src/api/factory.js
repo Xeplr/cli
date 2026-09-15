@@ -1,4 +1,4 @@
-// MODEL LAYER — every call the screens and the Designer make, to the API's
+// MODEL LAYER — every call the screens and the Forms pages make, to the API's
 // @xeplr/factory routes (mounted at /api in api/app.js).
 //
 // authFetch attaches the signed-in user's token (and the active company, when

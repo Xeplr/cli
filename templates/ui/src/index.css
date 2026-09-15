@@ -274,6 +274,30 @@ body { margin: 0; }
   .app-help { position: static; margin-top: 28px; width: auto; }
 }
 
+/* ── Forms ────────────────────────────────────────────────────────────── */
+.app-forms-new { display: flex; gap: 8px; max-width: 640px; margin: 0 0 18px; }
+
+.app-forms-new input {
+  flex: 1;
+  padding: 9px 11px;
+  border-radius: 6px;
+  border: 1px solid var(--xeplr-input-border);
+  background: var(--xeplr-input-bg);
+  color: var(--xeplr-input-text);
+  font: inherit;
+}
+
+.app-forms-pending { color: var(--xeplr-warning); }
+
+.app-notice {
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--xeplr-success-border);
+  background: var(--xeplr-success-bg);
+  color: var(--xeplr-success);
+}
+
 /* ── Designer ─────────────────────────────────────────────────────────── */
 /* The builder fills the space it is given, so it needs a height: the page
    below the top bar, less .main's padding. */

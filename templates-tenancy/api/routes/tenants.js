@@ -18,6 +18,7 @@ var { respond } = require('@xeplr/utils/lib/response');
 var { HTTP, STATUS } = require('@xeplr/utils/isomorphic');
 var authLib = require('@xeplr/auth');
 var tenancy = require('../tenancy');
+var { isSuperAdmin } = require('./access');
 var appDatabase = require('../db/setup');
 
 // The sign-in database, read directly — this app does not run the sign-in
@@ -28,11 +29,6 @@ var auth = authLib.attach();
 // admin, a creator below it. Roles from @xeplr/factory's access migration.
 var CREATOR_ROLE = { 1: 'CompanyAdmin' };
 var DEEPER_ROLE = 'Creator';
-
-function isSuperAdmin(req) {
-  var roles = (req.access && req.access.roles) || (req.user && req.user.roles) || [];
-  return roles.indexOf('Super Admin') !== -1;
-}
 
 var membership = null;
 

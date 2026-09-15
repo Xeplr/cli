@@ -315,7 +315,7 @@ test('without tenancy the project has no trace of it', function () {
   assert.ok(result.written.every(function (f) { return !/tenan|SelectScope|switch_menu/i.test(f); }), 'no tenancy files');
   result.written.forEach(function (rel) {
     if (/\.(svg|png)$/.test(rel)) return;
-    assert.doesNotMatch(fs.readFileSync(path.join(dir, rel), 'utf8'), /registerMTs\(|mtMiddleware|ScopeGate|memberGate/, rel);
+    assert.doesNotMatch(fs.readFileSync(path.join(dir, rel), 'utf8'), /registerMTs\(|mtMiddleware|ScopeGate|tenants\.memberGate|require\('\.\/routes\/tenants'\)/, rel);
   });
 });
 
@@ -330,7 +330,7 @@ test('with tenancy: levels registered on both sides, tables, picker first, membe
   assert.match(read('api/db/setup.js'), /registerMTs\(require\('\.\.\/tenancy'\)\.slots\)/);
   assert.match(read('ui/src/main.jsx'), /registerMTs\(tenancy\.slots\)/);
   assert.match(read('api/app.js'), /middleware: \[mtMiddleware\(\)\]/);
-  assert.match(read('api/app.js'), /auth: tenants\.memberGate/);
+  assert.match(read('api/app.js'), /var memberGate = tenants\.memberGate;/);
   assert.match(read('api/migrations/0001_tenants.sql'), /CREATE TABLE IF NOT EXISTS "companies"[\s\S]*CREATE TABLE IF NOT EXISTS "workspaces"/);
   assert.match(read('ui/src/App.jsx'), /<ProtectedRoute><ScopeGate><Shell \/><\/ScopeGate><\/ProtectedRoute>/);
   assert.match(read('ui/src/App.jsx'), /name: 'Switch company'/);
@@ -341,4 +341,30 @@ test('with tenancy: levels registered on both sides, tables, picker first, membe
     assert.doesNotMatch(read(rel), /__[A-Z][A-Z0-9_]*[A-Z0-9]__/, rel);
   });
   require(path.join(dir, 'api', 'tenancy.js'));
+});
+
+test('forms: a Super Admin menu to list, make, design, publish and open them — enforced by the API', function () {
+  var dir = path.join(tmpdir(), 'demo');
+  var result = generate.generate(answers(), dir);
+  var read = function (rel) { return fs.readFileSync(path.join(dir, rel), 'utf8'); };
+  ['ui/src/pages/Forms.jsx', 'ui/src/pages/FormDesigner.jsx', 'ui/src/pages/FormRecords.jsx', 'api/routes/access.js', 'api/migrations-auth/0003_forms_menu.sql'].forEach(function (f) {
+    assert.ok(result.written.indexOf(f) !== -1, f);
+  });
+  assert.ok(result.written.indexOf('ui/src/pages/Designer.jsx') === -1, 'the separate Designer page is gone');
+  var app = read('api/app.js');
+  assert.match(app, /var memberGate = access\.anyone;/);
+  assert.match(app, /design: \[memberGate, access\.superAdminOnly\]/);
+  var menu = read('api/migrations-auth/0003_forms_menu.sql');
+  assert.match(menu, /'Forms', '', false/, 'not public');
+  assert.match(menu, /r\.name = 'Super Admin'/);
+  var ui = read('ui/src/App.jsx');
+  assert.match(ui, /name: 'Forms'/);
+  assert.match(ui, /path="\/forms\/:form\/design\/:part"/);
+  var access = require(path.join(dir, 'api', 'routes', 'access.js'));
+  var sent = null;
+  var res = { status: function (c) { sent = c; return { send: function () {} }; } };
+  access.superAdminOnly({ access: { roles: ['Creator'] } }, res, function () { sent = 'next'; });
+  assert.strictEqual(sent, 403);
+  access.superAdminOnly({ access: { roles: ['Super Admin'] } }, res, function () { sent = 'next'; });
+  assert.strictEqual(sent, 'next');
 });
