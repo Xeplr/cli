@@ -432,3 +432,14 @@ test('a generated project reads like one: README at the root, in api and in ui',
   assert.match(fs.readFileSync(path.join(dir, 'api/README.md'), 'utf8'), /npm run start-api/);
   assert.match(fs.readFileSync(path.join(dir, 'ui/README.md'), 'utf8'), /by key/);
 });
+
+test('an occupied folder is refused before any question is asked', function () {
+  var dir = tmpdir();
+  fs.writeFileSync(path.join(dir, 'keep.txt'), 'x');
+  assert.strictEqual(generate.isOccupied(dir), true);
+  assert.strictEqual(generate.isOccupied(path.join(dir, 'nope')), false);
+  var run = require('child_process').spawnSync(process.execPath, [path.join(__dirname, '..', 'bin', 'xeplr.js'), 'new', path.basename(dir)], { cwd: path.dirname(dir), input: '', encoding: 'utf8' });
+  assert.strictEqual(run.status, 1);
+  assert.match(run.stderr, /already exists and is not empty/);
+  assert.doesNotMatch(run.stdout, /Port decade/, 'no question was asked');
+});

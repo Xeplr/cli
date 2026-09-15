@@ -51,7 +51,7 @@ export default function TasksHelp() {
         new column as you publish.
       </p>
 
-      <h3>Or by hand</h3>
+      <h3>Or without code</h3>
       <p>
         <strong>Configure UI → Forms → New form</strong>: label and key, design,
         publish, add to menu — no code. The full steps for a form with its own page, hooks and

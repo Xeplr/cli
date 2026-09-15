@@ -28,6 +28,6 @@
   },
   "devDependencies": {
     "dotenv-cli": "^8.0.0",
-    "@xeplr/cli": "^0.1.0"
+    "@xeplr/cli": "^0.1.6"
   }
 }

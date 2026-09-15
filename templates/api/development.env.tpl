@@ -56,3 +56,16 @@ AUTH_SUPER_ADMIN_PASSWORD=__ADMIN_PASSWORD__
 # email template can carry a token as a value but cannot build an address.
 AUTH_ACTIVATION_URL=http://localhost:__UI_PORT__/auth/activate
 AUTH_INVITE_URL=http://localhost:__UI_PORT__/auth/accept-invite
+
+# ── Email (optional) ──
+# Without it sign-in works, but activation, invite and password-reset links
+# cannot be sent. The sign-in service checks it at start and says so in its
+# banner: "email ✓ smtp — host:587, connected" or "✗ NOT WORKING — reason".
+# Providers: smtp | brevo | aws | azure — see @xeplr/utils' README.
+# EMAIL_PROVIDER=smtp
+# SMTP_HOST=
+# SMTP_PORT=587
+# SMTP_USER=
+# SMTP_PASS=
+# SMTP_FROM=
+# (smtp also needs `npm install nodemailer` in this folder)

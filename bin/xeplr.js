@@ -54,7 +54,14 @@ async function main() {
 
   var session = prompt.createSession();
   try {
-    var answers = await questions.collect(session, argv[1] && argv[1].indexOf('--') !== 0 ? argv[1] : undefined);
+    // A folder that already has something in it is refused NOW, before a
+    // single question is asked — not after the database password.
+    var argName = argv[1] && argv[1].indexOf('--') !== 0 ? argv[1] : undefined;
+    if (argName && generate.isOccupied(path.resolve(process.cwd(), argName))) {
+      console.error('\n  ' + path.resolve(process.cwd(), argName) + ' already exists and is not empty.\n');
+      return 1;
+    }
+    var answers = await questions.collect(session, argName);
     console.log(plan.describe(answers));
 
     var go = await session.confirm('  Create it?', true);
