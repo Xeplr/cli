@@ -54,9 +54,13 @@ export default function TasksHelp() {
 
       <h3>More than saving</h3>
       <p>
-        A value worked out on save, an email afterwards, a list only managers
-        see: <code>api/screens/task/task.hooks.js</code> — before, after, error
-        and override, for save, get and delete.
+        In the browser — a value added before saving, rows filtered for display,
+        an extra button on each row: <code>ui/src/pages/EditTask.jsx</code>.
+        Every method calls <code>super</code>; change the one you need.
+      </p>
+      <p>
+        On the server — a check against other records, an email afterwards, a
+        list only managers see: <code>api/screens/task/task.hooks.js</code>.
       </p>
 
       <h3>Two things that catch people</h3>

@@ -368,3 +368,14 @@ test('forms: a Super Admin menu to list, make, design, publish and open them —
   access.superAdminOnly({ access: { roles: ['Super Admin'] } }, res, function () { sent = 'next'; });
   assert.strictEqual(sent, 'next');
 });
+
+test('front-end hooks: the task module holds them, every method calling super, and both screens use them', function () {
+  var dir = path.join(tmpdir(), 'demo');
+  generate.generate(answers(), dir);
+  var edit = fs.readFileSync(path.join(dir, 'ui/src/pages/EditTask.jsx'), 'utf8');
+  assert.match(edit, /export class TaskHooks extends FactoryHooks/);
+  assert.strictEqual((edit.match(/return super\./g) || []).length, 4, 'get, save, delete, actions all call super');
+  var tasks = fs.readFileSync(path.join(dir, 'ui/src/pages/Tasks.jsx'), 'utf8');
+  assert.match(tasks, /import \{ taskHooks \} from '\.\/EditTask\.jsx'/);
+  assert.match(tasks, /hooks=\{taskHooks\}/);
+});
