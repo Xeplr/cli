@@ -35,8 +35,9 @@ AUTH_JWT_SECRET=__JWT_SECRET__
 # Where the sign-in service is. Your API asks it to check every token.
 AUTH_URL=http://localhost:__AUTH_PORT__
 
-# Your own sign-in setup files — menu entries and anything else this app adds.
-XEPLR_AUTH_MIGRATIONS=./migrations-auth
+# Sign-in setup files: the screens' permissions (@xeplr/factory's), then this
+# app's own — menu entries and anything else it adds. Comma-separated, in order.
+XEPLR_AUTH_MIGRATIONS=./node_modules/@xeplr/factory/migrations-auth,./migrations-auth
 
 # ── The first account you sign in with ──
 # Created for you when you set up the database. Change the password here and

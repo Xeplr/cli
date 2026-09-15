@@ -1,0 +1,10 @@
+{
+  "entity": "task",
+  "fields": [
+    { "label": "Title", "required": true, "validation": { "maxLength": 200 } },
+    { "label": "Status", "type": "dropdown", "options": ["To do", "In progress", "Done"], "required": true },
+    { "label": "Due date", "type": "date" },
+    { "label": "Description", "type": "textarea", "validation": { "maxLength": 1000 } }
+  ],
+  "listColumns": ["title", "status", "dueDate"]
+}

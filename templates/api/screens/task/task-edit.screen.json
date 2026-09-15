@@ -1,0 +1,103 @@
+{
+  "kind": "xeplr-screen",
+  "version": 1,
+  "id": "task_edit",
+  "name": "Add / edit task",
+  "units": "fraction",
+  "aspect": 1,
+  "width": 800,
+  "nodes": [
+    {
+      "id": "label",
+      "type": "label",
+      "x": 0.04,
+      "y": 0.04,
+      "w": 0.92,
+      "h": 0.07,
+      "z": 1,
+      "props": {
+        "text": "Add / edit task",
+        "variant": "heading"
+      }
+    },
+    {
+      "id": "title",
+      "type": "text",
+      "x": 0.04,
+      "y": 0.15,
+      "w": 0.4475,
+      "h": 0.08,
+      "z": 2,
+      "props": {
+        "label": "Title",
+        "required": true,
+        "validation": {
+          "maxLength": 200
+        },
+        "name": "title"
+      }
+    },
+    {
+      "id": "status",
+      "type": "dropdown",
+      "x": 0.5125,
+      "y": 0.15,
+      "w": 0.4475,
+      "h": 0.08,
+      "z": 3,
+      "props": {
+        "label": "Status",
+        "placeholder": "Select…",
+        "data": {
+          "source": "static",
+          "options": [
+            {
+              "id": "to_do",
+              "name": "To do"
+            },
+            {
+              "id": "in_progress",
+              "name": "In progress"
+            },
+            {
+              "id": "done",
+              "name": "Done"
+            }
+          ]
+        },
+        "required": true,
+        "name": "status"
+      }
+    },
+    {
+      "id": "dueDate",
+      "type": "date",
+      "x": 0.04,
+      "y": 0.27,
+      "w": 0.4475,
+      "h": 0.08,
+      "z": 4,
+      "props": {
+        "label": "Due date",
+        "name": "dueDate"
+      }
+    },
+    {
+      "id": "description",
+      "type": "textarea",
+      "x": 0.04,
+      "y": 0.39,
+      "w": 0.92,
+      "h": 0.18,
+      "z": 5,
+      "props": {
+        "label": "Description",
+        "validation": {
+          "maxLength": 1000
+        },
+        "name": "description"
+      }
+    }
+  ],
+  "source": "tasks"
+}

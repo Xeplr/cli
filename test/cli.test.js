@@ -238,3 +238,62 @@ test('no generated script shells out to sh', function () {
     });
   });
 });
+
+// ── setting the project up ──────────────────────────────────────────────────
+
+var setup = require('../lib/setup');
+var nextSteps = require('../lib/nextSteps');
+
+test('set-up installs both halves, then creates the databases — only with a connection', async function () {
+  var ran = [];
+  var runner = function (args, cwd) { ran.push(path.basename(cwd) + ': npm ' + args.join(' ')); return Promise.resolve(0); };
+  var withDb = await setup.run(answers({ connection: 'enc' }), '/tmp/demo', { runner: runner, log: function () {} });
+  assert.deepStrictEqual(ran, ['api: npm install', 'ui: npm install', 'api: npm run setup']);
+  assert.deepStrictEqual(withDb, { ok: true, databases: true });
+
+  ran = [];
+  var without = await setup.run(answers(), '/tmp/demo', { runner: runner, log: function () {} });
+  assert.deepStrictEqual(ran, ['api: npm install', 'ui: npm install'], 'no connection, no database step');
+  assert.strictEqual(without.databases, false);
+});
+
+test('set-up stops at the first failing step, and the next steps name it', async function () {
+  var runner = function (args, cwd) { return Promise.resolve(path.basename(cwd) === 'ui' ? 1 : 0); };
+  var result = await setup.run(answers({ connection: 'enc' }), '/tmp/demo', { runner: runner, log: function () {} });
+  assert.strictEqual(result.ok, false);
+  assert.strictEqual(result.failed.label, 'Installing the UI packages');
+  var text = nextSteps.describe(answers({ connection: 'enc' }), '/tmp/demo', result);
+  assert.match(text, /SET-UP STOPPED at: Installing the UI packages/);
+  assert.match(text, /demo[\\/]ui {2}&& {2}npm install/);
+});
+
+test('once set up, the next steps are only how to start it', function () {
+  var text = nextSteps.describe(answers({ connection: 'enc' }), '/tmp/demo', { ok: true, databases: true });
+  assert.doesNotMatch(text, /npm install|npm run setup|db:encrypt/);
+  assert.match(text, /npm run start-auth/);
+  assert.match(text, /npm run dev/);
+});
+
+// ── the sample: screens, not hand-written pages ─────────────────────────────
+
+test('the task sample is factory screens, published on startup and guarded', function () {
+  var dir = path.join(tmpdir(), 'demo');
+  generate.generate(answers(), dir);
+  var screens = path.join(dir, 'api', 'screens');
+  var edit = JSON.parse(fs.readFileSync(path.join(screens, 'task', 'task-edit.screen.json'), 'utf8'));
+  var list = JSON.parse(fs.readFileSync(path.join(screens, 'task', 'task-list.screen.json'), 'utf8'));
+  assert.strictEqual(edit.id, 'task_edit');
+  assert.strictEqual(edit.source, 'tasks');
+  assert.strictEqual(list.nodes[0].props.editScreen, 'task_edit');
+  assert.ok(!fs.existsSync(path.join(dir, 'api', 'models', 'Task.js')), 'no hand-written model');
+  assert.ok(!fs.existsSync(path.join(dir, 'api', 'migrations', '0001_tasks.sql')), 'the table comes from publishing, not a migration');
+
+  var www = fs.readFileSync(path.join(dir, 'api', 'bin', 'www'), 'utf8');
+  assert.match(www, /factory\.publishScreens\(screens\.documents\)/);
+  assert.match(fs.readFileSync(path.join(dir, 'api', 'app.js'), 'utf8'), /factory\.router\(\{ access: true \}\)/);
+  assert.match(fs.readFileSync(path.join(dir, 'api', 'development.env'), 'utf8'), /XEPLR_AUTH_MIGRATIONS=\.\/node_modules\/@xeplr\/factory\/migrations-auth,\.\/migrations-auth/);
+  var uiPkg = JSON.parse(fs.readFileSync(path.join(dir, 'ui', 'package.json'), 'utf8'));
+  ['@xeplr/ui-factory', '@xeplr/ui-canvas', '@xeplr/ui-table', '@tanstack/react-table'].forEach(function (dep) {
+    assert.ok(uiPkg.dependencies[dep], 'ui depends on ' + dep);
+  });
+});

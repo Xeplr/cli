@@ -1,4 +1,5 @@
 var createApp = require('@xeplr/base-apis/express');
+var factory = require('@xeplr/factory');
 var routes = require('./routes');
 
 // No `|| __API_PORT__` fallback — the port is required in env.required.js, so a
@@ -16,6 +17,18 @@ module.exports = function buildApp(extraRoutes) {
       publicPaths: ['/health']
     },
     log: { logDir: process.env.LOG_DIR || './logs' },
-    routes: Object.assign({}, extraRoutes || {}, { '/': routes })
+    routes: Object.assign({}, extraRoutes || {}, {
+      '/': routes,
+
+      // THE SCREENS — every entity made with the Designer, one set of routes:
+      //   /api/factory/screens/...   designs: load, save draft, publish
+      //   /api/factory/records/...   a screen's records: list, one, save, delete
+      //
+      // access: true — each route answers only a caller whose permissions name
+      // it ("Save factory record", "Publish factory screen", ...). Granted to
+      // Super Admin and CompanyAdmin (everything), Creator (use the screens) and
+      // Viewer (read) by node_modules/@xeplr/factory/migrations-auth.
+      '/api': factory.router({ access: true })
+    })
   });
 };

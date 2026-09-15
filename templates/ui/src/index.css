@@ -273,3 +273,28 @@ body { margin: 0; }
   .app-page-split { display: block; }
   .app-help { position: static; margin-top: 28px; width: auto; }
 }
+
+/* ── Designer ─────────────────────────────────────────────────────────── */
+/* The builder fills the space it is given, so it needs a height: the page
+   below the top bar, less .main's padding. */
+.app-designer {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 110px);
+  min-height: 520px;
+  gap: 10px;
+}
+
+.app-designer-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+.app-designer-title { font-weight: 600; margin-right: 10px; }
+
+.app-designer-bar .is-active { background: var(--xeplr-bg-secondary); }
+
+.app-designer-canvas {
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--xeplr-border-primary);
+  border-radius: 8px;
+  overflow: hidden;
+}

@@ -43,7 +43,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     // Force every import to THIS app's copy, so hook-using libraries don't
     // load twice and break the rules of hooks in ways that read as impossible.
-    resolve: { dedupe: ['react', 'react-dom', 'react-router-dom'] },
+    resolve: { dedupe: ['react', 'react-dom', 'react-router-dom', '@xeplr/ui-canvas', '@xeplr/ui-table'] },
     server: { port, strictPort: true, proxy },
     preview: { port, strictPort: true }
   }

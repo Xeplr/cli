@@ -32,6 +32,8 @@ require('@xeplr/base-apis').checkEnv(require('../env.required.js'), { appName: '
 var path = require('path');
 var { resolveConfig } = require('@xeplr/db');
 var { up } = require('@xeplr/db').sqlMigrator;
+var factory = require('@xeplr/factory');
+var screens = require('../screens');
 
 async function start() {
   // Name the connection before anything uses it — the migrator resolves by
@@ -40,18 +42,30 @@ async function start() {
 
   // Migrations run ON BOOT, so starting the API is the only thing anyone has
   // to remember. Already-applied ones are skipped.
+  //
+  // The screens' own table (factory_screens) first, then this app's.
   var result = await up({
     db: process.env.DB_API,
-    dir: path.join(__dirname, '..', 'migrations'),
+    dir: factory.migrationsDir,
+    extDir: path.join(__dirname, '..', 'migrations'),
     connectionName: 'api'
   });
   console.log(result.migrations.length
     ? '[api] ran ' + result.migrations.length + ' migrations'
     : '[api] migrations up to date');
 
-  // AWAITED before the app is built: routes/index.js hands MODEL CLASSES to
-  // genericRoute at build time, and an unbound class has no connection at all.
-  await require('../db/setup');
+  // AWAITED before the app is built: a model handed to genericRoute at build
+  // time has no connection at all until this has finished.
+  var knex = await require('../db/setup');
+
+  // The screens. A hooks file with a typo ("beforeSave") stops startup here,
+  // rather than silently never running.
+  await factory.init({ knex: knex, hooks: screens.hooks });
+
+  // Screens never published yet are published now, creating their tables.
+  // Ones already published are left alone — the Designer owns them.
+  var published = await factory.publishScreens(screens.documents);
+  if (published.published.length) console.log('[api] published screens: ' + published.published.join(', '));
 
   require('../app')();
 }

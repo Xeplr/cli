@@ -3,6 +3,7 @@ import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom'
 import { authRoutes, authPath, NavPage, ProtectedRoute } from '@xeplr/ui-account'
 import Home from './pages/Home.jsx'
 import Tasks from './pages/Tasks.jsx'
+import Designer from './pages/Designer.jsx'
 
 // The rail is ICON-ONLY when collapsed, so a drawer item without one is
 // invisible until somebody widens the rail. Same 24x24 stroke language the
@@ -12,6 +13,14 @@ const TasksIcon = (
        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 11l3 3L22 4" />
     <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+  </svg>
+)
+
+const DesignerIcon = (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2" />
+    <path d="M3 9h18M9 21V9" />
   </svg>
 )
 
@@ -42,7 +51,9 @@ function Shell() {
   // item with no error anywhere.
   const drawerItems = useMemo(() => [
     { name: 'Home', icon: HomeIcon, clickHandler: () => navigate('/home') },
-    { name: 'Tasks', icon: TasksIcon, clickHandler: () => navigate('/tasks') }
+    { name: 'Tasks', icon: TasksIcon, clickHandler: () => navigate('/tasks') },
+    // Shown only to roles given the "Designer" menu (migrations-auth/0003).
+    { name: 'Designer', icon: DesignerIcon, clickHandler: () => navigate('/designer') }
   ], [navigate])
 
   return (
@@ -76,6 +87,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<Home />} />
         <Route path="/tasks" element={<Tasks />} />
+        <Route path="/designer" element={<Designer />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/auth/login" replace />} />

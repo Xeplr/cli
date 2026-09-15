@@ -1,7 +1,8 @@
-// Every model this app owns. Add yours here — routes/index.js reads them from
-// this one place rather than reaching into individual files.
-var Task = require('./Task');
+// Models for tables you write by hand (see migrations/README.md) — each one a
+// class extending @xeplr/db's BaseModel, handed to genericRoute in
+// routes/index.js.
+//
+// Tables made with the Designer (screens/) need no model: @xeplr/factory saves
+// and reads them from the screen itself.
 
-module.exports = {
-  Task: Task
-};
+module.exports = {};

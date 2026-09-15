@@ -6,6 +6,7 @@ var questions = require('../lib/questions');
 var plan = require('../lib/plan');
 var generate = require('../lib/generate');
 var nextSteps = require('../lib/nextSteps');
+var setup = require('../lib/setup');
 var encryptCmd = require('../lib/commands/encrypt');
 
 var HELP = [
@@ -13,7 +14,8 @@ var HELP = [
   '  xeplr — create a working xeplr application',
   '',
   '  Usage:',
-  '    xeplr new [name]     create a project',
+  '    xeplr new [name]     create a project, install it and set up its databases',
+  '    xeplr new [name] --no-install   only write the files',
   '    xeplr encrypt        redo the database connection',
   '',
   '  new      Creates a project with an API, sign-in and a UI, all talking',
@@ -52,7 +54,7 @@ async function main() {
 
   var session = prompt.createSession();
   try {
-    var answers = await questions.collect(session, argv[1]);
+    var answers = await questions.collect(session, argv[1] && argv[1].indexOf('--') !== 0 ? argv[1] : undefined);
     console.log(plan.describe(answers));
 
     var go = await session.confirm('  Create it?', true);
@@ -60,6 +62,8 @@ async function main() {
       console.log('\n  Nothing was written.\n');
       return 0;
     }
+    var installNow = argv.indexOf('--no-install') === -1 && await session.confirm(
+      answers.connection ? '  Install packages and set up the databases now?' : '  Install packages now?', true);
   } finally {
     session.close();
   }
@@ -67,8 +71,10 @@ async function main() {
   var target = path.resolve(process.cwd(), answers.name);
   var result = generate.generate(answers, target);
   console.log('\n  Wrote ' + result.written.length + ' files.');
-  console.log(nextSteps.describe(answers, target));
-  return 0;
+
+  var done = installNow ? await setup.run(answers, target) : null;
+  console.log(nextSteps.describe(answers, target, done));
+  return done && !done.ok ? 1 : 0;
 }
 
 main().then(function (code) { process.exit(code); }, function (err) {
