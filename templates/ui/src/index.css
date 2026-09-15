@@ -275,8 +275,26 @@ body { margin: 0; }
 }
 
 /* ── Forms ────────────────────────────────────────────────────────────── */
-.app-forms-new { display: flex; gap: 8px; max-width: 640px; margin: 0 0 18px; }
+/* ── Configure UI ─────────────────────────────────────────────────────── */
+.app-tabs { display: flex; gap: 4px; margin: 4px 0 18px; border-bottom: 1px solid var(--xeplr-border-primary); }
 
+.app-tab {
+  padding: 8px 14px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--xeplr-text-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.app-tab.is-active { color: var(--xeplr-text-primary); border-bottom-color: var(--xeplr-accent); }
+
+.app-forms-new { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; max-width: 820px; margin: 0 0 18px; }
+
+.app-forms-field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 220px; font-size: 12px; color: var(--xeplr-text-muted); }
+
+.app-menu-label,
 .app-forms-new input {
   flex: 1;
   padding: 9px 11px;
@@ -333,3 +351,9 @@ body { margin: 0; }
   background: var(--xeplr-bg-tertiary);
   border: 1px solid var(--xeplr-border-primary);
 }
+
+.app-menu-hidden td { opacity: 0.5; }
+
+.app-menu-shown { display: inline-flex; gap: 6px; align-items: center; }
+
+.app-menu-settings .app-table { margin-bottom: 14px; }

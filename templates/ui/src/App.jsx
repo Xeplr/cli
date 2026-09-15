@@ -1,9 +1,10 @@
 import { useMemo } from 'react'
 import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom'
-import { authRoutes, authPath, NavPage, ProtectedRoute } from '@xeplr/ui-account'
+import { authRoutes, authPath, NavPage, ProtectedRoute, useAccess } from '@xeplr/ui-account'
 import Home from './pages/Home.jsx'
 import Tasks from './pages/Tasks.jsx'
-import Forms from './pages/Forms.jsx'
+import ConfigureUI from './pages/ConfigureUI.jsx'
+import { FORM_MENU_PREFIX } from './menu.js'
 import FormDesigner from './pages/FormDesigner.jsx'
 import FormRecords from './pages/FormRecords.jsx'
 __MT_APP_UI_IMPORTS__
@@ -40,9 +41,14 @@ const HomeIcon = (
 const notifications = { count: 0, onClick: () => {} }
 
 // Rendered above the framework's built-in Profile / Change Password section.
+// `key` is the menu row it matches (shown only to roles given that row); what
+// people read is its label, changed in Configure UI → Menu.
 const settingsOverrides = [
-  { name: 'Admin', path: authPath('userRoles') }
+  { key: 'Admin', path: authPath('userRoles') },
+  // Super Admin only (migrations-auth/0003): every form, and the side rail.
+  { key: 'Configure UI', path: '/configure' }
 ]
+
 
 // Layout route: NavPage and the routed page are independent siblings, and this
 // holds no state of its own — lifting page state up here would re-render the
@@ -50,16 +56,22 @@ const settingsOverrides = [
 function Shell() {
   const navigate = useNavigate()
 
-  // The drawer's catalog. A name here must match a seeded `menus` row —
-  // @xeplr/ui-account drops unrecognised names SILENTLY, so a typo removes the
-  // item with no error anywhere.
+  const { access } = useAccess()
+  const menus = (access && access.menus) || []
+
+  // The drawer's catalog, by KEY. A key must match a `menus` row's name —
+  // @xeplr/ui-account drops unknown keys SILENTLY, so a typo removes the item
+  // with no error anywhere. The text shown is the row's label (Configure UI →
+  // Menu), in the order set there — never written here.
   const drawerItems = useMemo(() => [
-    { name: 'Home', icon: HomeIcon, clickHandler: () => navigate('/home') },
-    { name: 'Tasks', icon: TasksIcon, clickHandler: () => navigate('/tasks') },
-    // Super Admin only — the "Forms" menu (migrations-auth/0003).
-    { name: 'Forms', icon: FormsIcon, clickHandler: () => navigate('/forms') },
+    { key: 'Home', icon: HomeIcon, clickHandler: () => navigate('/home') },
+    { key: 'Tasks', icon: TasksIcon, clickHandler: () => navigate('/tasks') },
 __MT_DRAWER_ITEM__
-  ], [navigate])
+    // Every form added to the menu, with no code: "form:crop" opens /forms/crop.
+    ...menus.filter((key) => key.startsWith(FORM_MENU_PREFIX)).map((key) => ({
+      key, icon: FormsIcon, clickHandler: () => navigate('/forms/' + key.slice(FORM_MENU_PREFIX.length))
+    }))
+  ], [navigate, menus])
 
   return (
     <div className="app">
@@ -93,9 +105,9 @@ __MT_SELECT_ROUTE__
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<Home />} />
         <Route path="/tasks" element={<Tasks />} />
-        <Route path="/forms" element={<Forms />} />
         <Route path="/forms/:form" element={<FormRecords />} />
-        <Route path="/forms/:form/design/:part" element={<FormDesigner />} />
+        <Route path="/configure" element={<ConfigureUI />} />
+        <Route path="/configure/forms/:form/design/:part" element={<FormDesigner />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/auth/login" replace />} />

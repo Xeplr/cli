@@ -1,6 +1,6 @@
 // THE TASK FORM — and what the task screens do in the browser.
 //
-// The form itself is the "task_edit" screen, designed on the Forms page. This
+// The form itself is the "task_edit" screen, designed in Configure UI → Forms. This
 // module holds its HOOKS, used by this page, by the Tasks list and by the
 // popup the list opens.
 import { useEffect, useState } from 'react'

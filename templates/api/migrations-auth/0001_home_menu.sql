@@ -1,5 +1,5 @@
 -- "Home" — this app's own drawer item, matching the name used in the UI's
--- drawerItems list (ui/src/App.jsx).
+-- drawerItems list (ui/src/App.jsx), by key. Its label is changed in Configure UI → Menu.
 --
 -- Without this row the item is dropped from the drawer SILENTLY: the name has
 -- to exist here for @xeplr/ui-account to show it, and an unrecognised one

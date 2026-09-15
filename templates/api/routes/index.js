@@ -26,7 +26,7 @@ router.get('/whoami', function(req, res) {
 // path which to forward. Serve data at /tasks and the UI's own /tasks page is
 // shadowed by it — opening that page shows raw JSON instead of the app.
 //
-// Forms (tasks, and any made on the Forms page) need nothing here — @xeplr/factory
+// Forms (tasks, and any made in Configure UI) need nothing here — @xeplr/factory
 // serves them at /api/factory/..., mounted in app.js.
 //
 // A table you write by hand gets its four addresses from one line:

@@ -341,7 +341,7 @@ test('with tenancy: levels registered on both sides, tables, picker first, membe
   assert.match(read('api/app.js'), /var memberGate = tenants\.memberGate;/);
   assert.match(read('api/migrations/0001_tenants.sql'), /CREATE TABLE IF NOT EXISTS "companies"[\s\S]*CREATE TABLE IF NOT EXISTS "workspaces"/);
   assert.match(read('ui/src/App.jsx'), /<ProtectedRoute><ScopeGate><Shell \/><\/ScopeGate><\/ProtectedRoute>/);
-  assert.match(read('ui/src/App.jsx'), /name: 'Switch company'/);
+  assert.match(read('ui/src/App.jsx'), /key: 'Switch company'/);
   assert.match(read('api/migrations-auth/0004_switch_menu.sql'), /'Switch company'/);
   // Nothing left unfilled, and the JS parses.
   result.written.forEach(function (rel) {
@@ -355,19 +355,22 @@ test('forms: a Super Admin menu to list, make, design, publish and open them —
   var dir = path.join(tmpdir(), 'demo');
   var result = generate.generate(answers(), dir);
   var read = function (rel) { return fs.readFileSync(path.join(dir, rel), 'utf8'); };
-  ['ui/src/pages/Forms.jsx', 'ui/src/pages/FormDesigner.jsx', 'ui/src/pages/FormRecords.jsx', 'api/routes/access.js', 'api/migrations-auth/0003_forms_menu.sql'].forEach(function (f) {
+  ['ui/src/pages/ConfigureUI.jsx', 'ui/src/pages/Forms.jsx', 'ui/src/pages/MenuSettings.jsx', 'ui/src/pages/FormDesigner.jsx', 'ui/src/pages/FormRecords.jsx', 'api/routes/access.js', 'api/migrations-auth/0003_configure_ui_menu.sql'].forEach(function (f) {
     assert.ok(result.written.indexOf(f) !== -1, f);
   });
   assert.ok(result.written.indexOf('ui/src/pages/Designer.jsx') === -1, 'the separate Designer page is gone');
   var app = read('api/app.js');
   assert.match(app, /var memberGate = access\.anyone;/);
   assert.match(app, /design: \[memberGate, access\.superAdminOnly\]/);
-  var menu = read('api/migrations-auth/0003_forms_menu.sql');
-  assert.match(menu, /'Forms', '', false/, 'not public');
+  var menu = read('api/migrations-auth/0003_configure_ui_menu.sql');
+  assert.match(menu, /'Configure UI', '', false/, 'not public');
   assert.match(menu, /r\.name = 'Super Admin'/);
   var ui = read('ui/src/App.jsx');
-  assert.match(ui, /name: 'Forms'/);
-  assert.match(ui, /path="\/forms\/:form\/design\/:part"/);
+  assert.match(ui, /\{ key: 'Configure UI', path: '\/configure' \}/, 'in the settings menu');
+  assert.doesNotMatch(ui, /key: 'Forms'/, 'not in the side rail');
+  assert.match(ui, /path="\/configure\/forms\/:form\/design\/:part"/);
+  assert.match(ui, /\{ key: 'Tasks', icon: TasksIcon/, 'drawer items by key, no label in code');
+  assert.match(ui, /key\.startsWith\(FORM_MENU_PREFIX\)/, 'forms added to the menu reach the rail');
   var access = require(path.join(dir, 'api', 'routes', 'access.js'));
   var sent = null;
   var res = { status: function (c) { sent = c; return { send: function () {} }; } };
@@ -403,4 +406,18 @@ test('a new UI is described for Claude: CLAUDE.md with the recipe and the prompt
   assert.match(screens, /require\('\.\/task\/task\.model'\)/);
   assert.match(fs.readFileSync(path.join(dir, 'api/bin/www'), 'utf8'), /models: screens\.models/);
   assert.match(fs.readFileSync(path.join(dir, 'api/screens/task/task.model.js'), 'utf8'), /class TaskModel extends FactoryModel/);
+});
+
+test('menu keys live in one place: App.jsx and Configure UI → Menu share ui/src/menu.js', function () {
+  var plain = path.join(tmpdir(), 'demo');
+  generate.generate(answers(), plain);
+  var menu = fs.readFileSync(path.join(plain, 'ui/src/menu.js'), 'utf8');
+  assert.match(menu, /export const FORM_MENU_PREFIX = 'form:'/);
+  assert.match(menu, /'Home',\n  'Tasks',\n  'Admin',\n  'Configure UI'/);
+  assert.match(fs.readFileSync(path.join(plain, 'ui/src/App.jsx'), 'utf8'), /import \{ FORM_MENU_PREFIX \} from '\.\/menu\.js'/);
+  assert.match(fs.readFileSync(path.join(plain, 'ui/src/pages/MenuSettings.jsx'), 'utf8'), /APP_MENU_KEYS\.includes\(name\)/);
+
+  var mt = path.join(tmpdir(), 'demo');
+  generate.generate(answers({ tenancy: questions.tenancyLevels('company') }), mt);
+  assert.match(fs.readFileSync(path.join(mt, 'ui/src/menu.js'), 'utf8'), /'Tasks',\n  'Switch company',\n  'Admin'/);
 });

@@ -1,15 +1,17 @@
-// FORMS — every form in the app, for Super Admin: see them, make a new one,
-// design it, publish it, open it.
+// FORMS — every UI in the app (Configure UI → Forms). Make one, design it,
+// publish it, open it, add it to the side rail.
 //
-// A form is two screens: a LIST of its records, and the add / edit FORM the
-// list opens in a popup. Records live in an ordinary table named for the form
-// ("farming_departments"), created when the form is first published.
+// A form is two screens: a LIST of its records, and the add / edit FORM the list
+// opens in a popup. Its KEY (farming_department) names the screens and the table
+// (farming_departments) and cannot change once published; its LABEL is what
+// people see, renamed any time in its design.
 //
-// Claude can make forms too (api/screens/, `npx xeplr-factory screens`); this
-// page is the same thing by hand.
+// Claude can make forms too — see "Create a new UI" in CLAUDE.md.
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { listMenuItems, addMenuItem, removeMenuItem, useAccess } from '@xeplr/ui-account'
 import { factory } from '../api/factory.js'
+import { FORM_MENU_PREFIX } from '../menu.js'
 
 /** listScreens rows → one entry per form: { key, name, source, list, edit }. */
 function groupForms(rows) {
@@ -34,26 +36,48 @@ function state(screen) {
   return { label: 'v' + screen.version + (screen.hasDraft ? ' · unpublished changes' : ''), unpublished: screen.hasDraft }
 }
 
+/** "Farming departments" → "farming_department": a suggestion, editable. */
+function suggestKey(label) {
+  const words = String(label).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean)
+  if (!words.length) return ''
+  const last = words[words.length - 1]
+  words[words.length - 1] = /ies$/.test(last) ? last.slice(0, -3) + 'y' : /(ss|us)$/.test(last) ? last : last.replace(/s$/, '')
+  const key = words.join('_')
+  return /^[a-z]/.test(key) ? key : 'form_' + key
+}
+
 export default function Forms() {
   const navigate = useNavigate()
+  const { refreshAccess } = useAccess()
   const [forms, setForms] = useState(null)
+  const [inMenu, setInMenu] = useState(new Set())
   const [error, setError] = useState(null)
   const [notice, setNotice] = useState(null)
-  const [name, setName] = useState('')
+  const [label, setLabel] = useState('')
+  const [key, setKey] = useState('')
+  const [keyEdited, setKeyEdited] = useState(false)
   const [busy, setBusy] = useState(null)
 
   const load = useCallback(() => {
     factory.listScreens().then((rows) => { setForms(groupForms(rows)); setError(null) }, (e) => setError(e.message))
+    listMenuItems().then(
+      (items) => setInMenu(new Set(items.filter((m) => m.name.startsWith(FORM_MENU_PREFIX) && !m.isHidden).map((m) => m.name.slice(FORM_MENU_PREFIX.length)))),
+      () => {}
+    )
   }, [])
   useEffect(load, [load])
+
+  const onLabel = (value) => {
+    setLabel(value)
+    if (!keyEdited) setKey(suggestKey(value))
+  }
 
   const create = async (e) => {
     e.preventDefault()
     setBusy('new')
     try {
-      const made = await factory.createEntity({ entity: name })
-      // Straight into its form, to add the fields.
-      navigate('/forms/' + made.edit.replace(/_edit$/, '') + '/design/form')
+      const made = await factory.createEntity({ key: key.trim(), label: label.trim() })
+      navigate('/configure/forms/' + made.key + '/design/form')
     } catch (err) {
       setError(err.message)
       setBusy(null)
@@ -74,8 +98,6 @@ export default function Forms() {
       setError(null)
       load()
     } catch (err) {
-      // Removing a field drops its column — that is confirmed in the designer,
-      // where the columns and their values are shown.
       setError(err.confirm
         ? 'Publishing "' + form.name + '" would remove columns and their data — open Design form and publish there to see what, and confirm.'
         : err.message)
@@ -84,21 +106,37 @@ export default function Forms() {
     }
   }
 
+  const toggleMenu = async (form) => {
+    setBusy(form.key)
+    try {
+      if (inMenu.has(form.key)) await removeMenuItem(FORM_MENU_PREFIX + form.key)
+      else await addMenuItem({ name: FORM_MENU_PREFIX + form.key, label: form.name })
+      await refreshAccess()
+      setNotice(inMenu.has(form.key) ? 'Removed "' + form.name + '" from the menu' : 'Added "' + form.name + '" to the menu — rename or move it in the Menu tab')
+      load()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy(null)
+    }
+  }
+
   return (
-    <div className="app-page app-forms">
-      <h1>Forms</h1>
+    <div className="app-forms">
       <p className="app-page-lead">
-        Every form in the app. A new one starts with a Name field — add the rest in its design, then publish to create its table.
+        Every UI in the app. A new one starts with a Name field — add the rest in its design, then publish to create its table.
       </p>
 
       <form className="app-forms-new" onSubmit={create}>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder='New form — one record is a… e.g. "farming department"'
-          aria-label="New form name"
-        />
-        <button type="submit" className="app-btn" disabled={!name.trim() || busy === 'new'}>
+        <label className="app-forms-field">
+          <span>Label — what people see</span>
+          <input value={label} onChange={(e) => onLabel(e.target.value)} placeholder="Farming departments" />
+        </label>
+        <label className="app-forms-field">
+          <span>Key — names its table; fixed once published</span>
+          <input value={key} onChange={(e) => { setKey(e.target.value); setKeyEdited(true) }} placeholder="farming_department" />
+        </label>
+        <button type="submit" className="app-btn" disabled={!key.trim() || busy === 'new'}>
           {busy === 'new' ? 'Creating…' : 'New form'}
         </button>
       </form>
@@ -110,7 +148,7 @@ export default function Forms() {
       {forms && forms.length > 0 && (
         <table className="app-table">
           <thead>
-            <tr><th>Name</th><th>Table</th><th>Form</th><th>List</th><th /></tr>
+            <tr><th>Label</th><th>Table</th><th>Form</th><th>List</th><th /></tr>
           </thead>
           <tbody>
             {forms.map((form) => {
@@ -125,8 +163,11 @@ export default function Forms() {
                   <td className={list.unpublished ? 'app-forms-pending' : undefined}>{list.label}</td>
                   <td className="app-row-actions">
                     <button className="app-btn app-btn-quiet" disabled={!canOpen} title={canOpen ? '' : 'Publish it first'} onClick={() => navigate('/forms/' + form.key)}>Open</button>
-                    {form.edit && <button className="app-btn app-btn-quiet" onClick={() => navigate('/forms/' + form.key + '/design/form')}>Design form</button>}
-                    {form.list && <button className="app-btn app-btn-quiet" onClick={() => navigate('/forms/' + form.key + '/design/list')}>Design list</button>}
+                    {form.edit && <button className="app-btn app-btn-quiet" onClick={() => navigate('/configure/forms/' + form.key + '/design/form')}>Design form</button>}
+                    {form.list && <button className="app-btn app-btn-quiet" onClick={() => navigate('/configure/forms/' + form.key + '/design/list')}>Design list</button>}
+                    <button className="app-btn app-btn-quiet" disabled={!canOpen || busy === form.key} title={canOpen ? '' : 'Publish it first'} onClick={() => toggleMenu(form)}>
+                      {inMenu.has(form.key) ? 'Remove from menu' : 'Add to menu'}
+                    </button>
                     {(edit.unpublished || list.unpublished) && (
                       <button className="app-btn" disabled={busy === form.key} onClick={() => publish(form)}>
                         {busy === form.key ? 'Publishing…' : 'Publish'}

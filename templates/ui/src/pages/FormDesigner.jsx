@@ -43,14 +43,14 @@ export default function FormDesigner() {
   return (
     <div className="app-designer">
       <div className="app-designer-bar">
-        <button type="button" className="app-btn app-btn-quiet" onClick={() => navigate('/forms')}>← Forms</button>
+        <button type="button" className="app-btn app-btn-quiet" onClick={() => navigate('/configure')}>← Configure UI</button>
         <span className="app-designer-title">{current ? current.document.name : form}</span>
         {PARTS.map((p) => (
           <button
             key={p.part}
             type="button"
             className={'app-btn app-btn-quiet' + ((part === 'list') === (p.part === 'list') ? ' is-active' : '')}
-            onClick={() => navigate('/forms/' + form + '/design/' + p.part)}
+            onClick={() => navigate('/configure/forms/' + form + '/design/' + p.part)}
           >
             {p.label}
           </button>

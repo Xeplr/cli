@@ -45,7 +45,7 @@ export default function TasksHelp() {
 
       <h3>Change it</h3>
       <p>
-        Open <strong>Forms</strong> in the side rail and{' '}
+        Open <strong>Configure UI</strong> in the settings menu (top right) and{' '}
         <strong>Design form</strong> on Tasks. Add a field, move one, change a
         label or a colour — then <strong>Publish</strong>. The table gains its
         new column as you publish.
@@ -53,8 +53,8 @@ export default function TasksHelp() {
 
       <h3>Or by hand</h3>
       <p>
-        <strong>Forms → New form</strong>: name it, design it, publish it, open
-        it — no code. The full steps for a form with its own page, hooks and
+        <strong>Configure UI → Forms → New form</strong>: label and key, design,
+        publish, add to menu — no code. The full steps for a form with its own page, hooks and
         model are in <code>CLAUDE.md</code>, under "Create a new UI".
       </p>
 

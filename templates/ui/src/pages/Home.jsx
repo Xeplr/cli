@@ -59,8 +59,8 @@ export default function Home() {
           sample logo, in the top bar and the side rail.
         </li>
         <li>
-          <strong>Forms</strong>, in the side rail — make a new form, or change the
-          sample task screens. Publish creates or changes the table too.
+          <strong>Configure UI</strong>, in the settings menu — every form (make one,
+          design it, publish it, add it to the menu) and the side rail's labels.
         </li>
         <li>
           <code>src/App.jsx</code> — add your own pages, and the side-rail items
