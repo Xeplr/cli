@@ -4,8 +4,10 @@ Creates a working xeplr application — an API, sign-in, and a UI — from a few
 questions, installs it, and sets up its databases.
 
 ```bash
-npx @xeplr/cli new myapp
+npx @xeplr/cli@latest new myapp
 ```
+
+`@latest` makes npx fetch the newest version rather than one it cached earlier.
 
 ## What you get
 
@@ -28,10 +30,15 @@ Already working, with nothing to wire up:
   table. Neither is written by hand: both are screens
   ([`@xeplr/ui-factory`](https://www.npmjs.com/package/@xeplr/ui-factory)),
   published when the API first starts.
-- **A Forms page** for Super Admin — every form in the app; make a new one by
-  hand (no Claude needed), design its form and its list, publish (which creates
-  or changes its table), open it. Nobody else sees it, and the API refuses
-  everyone else.
+- **Configure UI** for Super Admin, in the settings menu (top right) — not in
+  the side rail, which is for the pages people use:
+  - **Forms**: every UI in the app. New form (a **label** people see and a
+    **key** that names its table), design its form and its list, publish (which
+    creates or changes its table), open it, **add it to the side rail** — no
+    code, no Claude needed.
+  - **Menu**: rename, reorder and hide the side rail's items.
+
+  Nobody else sees it, and the API refuses everyone else.
 - **Multi-tenancy, if you ask for it** — companies (or companies and
   workspaces, up to four levels). Every row is stamped with the one it was made
   in, every read sees only its rows, membership is checked on every request,
@@ -46,6 +53,21 @@ Already working, with nothing to wire up:
   > with: Name (required), Region (dropdown: North, South, East, West), Area in
   > acres (number, at least 0), Started on (date), Notes (long text). Show Name,
   > Region and Area in the list. Follow "Create a new UI" in CLAUDE.md.
+
+## Rules the generated app follows
+
+These are architecture decisions, not defaults to tune — each one exists because the alternative failed quietly.
+
+| Rule | Where | Why |
+|---|---|---|
+| **Records live in real tables, one column per field — never JSON.** | `@xeplr/factory` | `select * from tasks` and plain-SQL reports must work. Only a screen's *design* is JSON (the `factory_screens` table). |
+| **A key and a label, everywhere.** A form's key (`farming_department`) names its screens and table and never changes once published; its label is renamed any time. A menu item's key (`menus.name`, used by `drawerItems` / `settingsOverrides` in `ui/src/App.jsx` and `ui/src/menu.js`) is what code matches; its label is what the rail shows. | `@xeplr/auth`, `@xeplr/ui-account` | Code must never break because someone renamed something people read. No label is written in code. |
+| **`REDIS_PREFIX` is required and unique per app** (`api/development.env`, set to `<name>:`). | `@xeplr/auth`, `@xeplr/utils` | Two apps on one Redis under the shared default serve each other's sessions, menus and API permissions. Sign-in refuses to start without it, or with `xeplr:`. |
+| **Designing, new forms and publishing are Super Admin only.** | `api/routes/access.js`, `@xeplr/auth` menu routes | Publishing changes database tables. Every other screen route checks the permission catalog. |
+| **The browser is not a security boundary.** Front-end hooks (`ui/src/pages/Edit<Form>.jsx`) shape what people see and send; anything that must hold goes in server hooks (`api/screens/<form>/<form>.hooks.js`); data shape in the model (`<form>.model.js`). | `@xeplr/ui-factory`, `@xeplr/factory` | |
+| **Every data address is under `/api`.** | `api/routes`, `ui/vite.config.js` | A page path and a data path must never collide. |
+| **No guessed database names or connections.** | `api/development.env` | A wrong-but-present value starts cleanly and reads as empty data. |
+| **Email is checked at start, never fatal.** The sign-in banner shows `email ✓ …` or `✗ NOT WORKING — reason`. | `@xeplr/auth` | Sign-in works without email; activation, invite and reset links cannot be sent until `EMAIL_PROVIDER` is set. |
 
 ## Before you start
 
@@ -83,12 +105,48 @@ cd myapp/api && npm run start-api    # your API — publishes the sample screens
 cd myapp/ui  && npm run dev          # the app
 ```
 
-Open the UI and sign in with the account you named.
+Open the UI and sign in with the account you named. As Super Admin you will
+see **Configure UI** in the settings menu, top right.
+
+**Use a new project name for a new app.** The name decides the database names
+(`<name>_auth`, `<name>_api`); an existing database is kept as it is, with its
+accounts — the super admin you enter is created only in a fresh one.
 
 `xeplr new myapp --no-install` only writes the files; then run `npm install` in
 `api` and `ui`, and `npm run setup` in `api`, yourself. If set-up stops part
 way (Postgres not running, say), the installer says which step and the command
 to run again.
+
+## Creating a new UI
+
+Two ways, both in the running app's project:
+
+- **No code** — Configure UI → Forms → New form → design → Publish → Add to menu.
+- **With Claude** — open Claude in the project folder and give it this (it is
+  also beside the sample, with a Copy button):
+
+  > Create a new UI for farming departments. One record is a farming department
+  > with: Name (required), Region (dropdown: North, South, East, West), Area in
+  > acres (number, at least 0), Started on (date), Notes (long text). Show Name,
+  > Region and Area in the list. Follow "Create a new UI" in CLAUDE.md.
+
+  Claude follows `CLAUDE.md`: the screens and server hooks and model
+  (`npx xeplr-factory screens … --no-pages`), the page with its front-end hooks,
+  the route, the side-rail item and its menu row. Then restart the sign-in
+  service and the API — the API publishes the new screens and creates the table.
+
+## Commands in a generated project
+
+| Where | Command | Does |
+|---|---|---|
+| `api/` | `npm run setup` | create both databases, the sign-in tables, permissions and menus |
+| `api/` | `npm run start-auth` | the sign-in service |
+| `api/` | `npm run start-api` | the API — runs migrations and publishes never-published screens on start |
+| `api/` | `npm run migrate:auth` | apply new `migrations-auth/*.sql` (e.g. a new menu row) |
+| `api/` | `npm run db:encrypt` | redo the encrypted database connection |
+| `api/` | `npx xeplr-factory screens screens/<form>/<form>.entity.json -o screens/<form> --no-pages` | a form's screens, server hooks and model from its spec |
+| `api/` | `npx xeplr-factory validate <screen>.json` | check a screen document |
+| `ui/` | `npm run dev` | the app |
 
 ## Changing the database connection later
 
