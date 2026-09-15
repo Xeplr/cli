@@ -421,3 +421,14 @@ test('menu keys live in one place: App.jsx and Configure UI → Menu share ui/sr
   generate.generate(answers({ tenancy: questions.tenancyLevels('company') }), mt);
   assert.match(fs.readFileSync(path.join(mt, 'ui/src/menu.js'), 'utf8'), /'Tasks',\n  'Switch company',\n  'Admin'/);
 });
+
+test('a generated project reads like one: README at the root, in api and in ui', function () {
+  var dir = path.join(tmpdir(), 'demo');
+  generate.generate(answers(), dir);
+  var root = fs.readFileSync(path.join(dir, 'README.md'), 'utf8');
+  assert.match(root, /^# demo\n/);
+  assert.match(root, /sign in as `admin@demo\.local`/);
+  assert.match(root, /REDIS_PREFIX/);
+  assert.match(fs.readFileSync(path.join(dir, 'api/README.md'), 'utf8'), /npm run start-api/);
+  assert.match(fs.readFileSync(path.join(dir, 'ui/README.md'), 'utf8'), /by key/);
+});

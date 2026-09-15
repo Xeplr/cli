@@ -45,6 +45,8 @@ Already working, with nothing to wire up:
   and choosing one is the first screen after signing in.
 - **A welcome screen** that checks it can reach everything and tells you which
   files to change first.
+- **READMEs** at the project root and in `api/` and `ui/`: how to start it,
+  every command, where things live, and the rules the app follows.
 - **A `CLAUDE.md`** that tells Claude how to create a new UI in this app — the
   screens, the page with its front-end hooks, the server hooks and model, the
   route and menu entry — and a ready prompt (also shown beside the sample):
