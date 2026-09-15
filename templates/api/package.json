@@ -20,7 +20,8 @@
     "@xeplr/auth": "^1.1.2",
     "@xeplr/base-apis": "^2.0.0",
     "@xeplr/db": "^1.0.6",
-    "@xeplr/factory": "^1.0.3",
+    "@xeplr/factory": "^1.0.4",
+    "@xeplr/ui-factory": "^1.0.5",
     "@xeplr/utils": "^1.0.8",
     "dotenv": "^17.4.2",
     "express": "^5.2.0"
