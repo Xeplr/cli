@@ -1,14 +1,41 @@
+import { useState } from 'react'
+
 // The panel beside the sample. It is here so the first thing anybody builds is
 // explained where they are looking, rather than in a document they have to go
 // and find.
+
 // The same prompt as in CLAUDE.md. Replace the form and its fields.
 const PROMPT = 'Create a new UI for farming departments. One record is a farming department with: Name (required), Region (dropdown: North, South, East, West), Area in acres (number, at least 0), Started on (date), Notes (long text). Show Name, Region and Area in the list. Follow "Create a new UI" in CLAUDE.md.'
 
 export default function TasksHelp() {
+  const [copied, setCopied] = useState(false)
+  const copy = () => {
+    navigator.clipboard.writeText(PROMPT).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }, () => {})
+  }
+
   return (
     <aside className="app-help">
       <div className="app-help-badge">Sample</div>
-      <h2>This page is an example</h2>
+      <h2>Create your own UI with Claude</h2>
+      <p>
+        Open Claude in this project's folder (the one with <code>api</code> and{' '}
+        <code>ui</code>) and give it this — change the name and the fields:
+      </p>
+      <pre className="app-help-prompt">{PROMPT}</pre>
+      <button type="button" className="app-btn app-btn-quiet" onClick={copy}>
+        {copied ? 'Copied' : 'Copy prompt'}
+      </button>
+      <p>
+        Add behaviour in the same message if you want it — "a Mark active button
+        on each row", "Region is required when Area is over 100". When Claude is
+        done, restart the sign-in service and the API: the menu item appears and
+        the table is created.
+      </p>
+
+      <h3>This page is an example</h3>
       <p>
         A task has a title, a status, a due date and a description. Neither the
         list nor the form is written by hand — both are <strong>screens</strong>,
@@ -22,14 +49,6 @@ export default function TasksHelp() {
         <strong>Design form</strong> on Tasks. Add a field, move one, change a
         label or a colour — then <strong>Publish</strong>. The table gains its
         new column as you publish.
-      </p>
-
-      <h3>Ask Claude for one</h3>
-      <p>In this project, give Claude a prompt like:</p>
-      <pre className="app-help-prompt">{PROMPT}</pre>
-      <p>
-        It follows <code>CLAUDE.md</code> — the screens, the page with its hooks,
-        the server hooks and model, the menu entry — and the API creates the table.
       </p>
 
       <h3>Or by hand</h3>
