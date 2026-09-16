@@ -38,8 +38,18 @@ export class TaskHooks extends FactoryHooks {
 
   /**
    * Before a stepper moves — Next, Back, or a click on the bar.
-   * Return false to stay where you are, or a step number to go there instead.
-   * The step's own required fields are checked before this runs.
+   *
+   * Return false to stay where you are, or a step (its key or its number) to
+   * go there instead. ctx.disable(['planning']) rules steps out — they stay on
+   * the bar, struck through, and Next and Back pass over them; ctx.enable()
+   * brings them all back. The step's own required fields are checked before
+   * this runs, so this is for your rules, not theirs. For example:
+   *
+   *   if (ctx.from === 0 && ctx.values.priority === 'low') {
+   *     ctx.disable(['planning'])
+   *     return 'attachment'
+   *   }
+   *   ctx.enable()
    */
   step(ctx) {
     return super.step(ctx)

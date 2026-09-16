@@ -45,7 +45,7 @@ Then change only what the request asks for:
 
 - **`multiselect`** — several ids in ONE text column, comma separated, and an array in your code. An option's id may not contain a comma.
 - **`file`** — the column holds the **path**, never the file. Say which extensions (`"accept": ".pdf,.docx"`) and how large (`"maxSize": 10`, in MB); the API enforces both, by extension, and keeps the file under `FACTORY_FILES_DIR`. Uploading needs `multer` in `api/` (already in package.json).
-- **`stepper`** — a journey across the top. Every other field says which step it is on (`"step": "Planning"`), and one without a `step` shows on every step. `step(ctx)` in the front-end hooks runs before each move.
+- **`stepper`** — a journey across the top. Every other field says which step it is on (`"step": "Planning"`), and one without a `step` shows on every step. `step(ctx)` in the front-end hooks runs before each move: return `false` to stay, a step's key to go there, `ctx.disable(['planning'])` to rule steps out (struck through on the bar, passed over by Next and Back) and `ctx.enable()` to bring them back.
 
 **A list opens its form on a page or in a popup** — `"openIn": "page"` in the entity spec, or Configure UI → Forms → the list. A page needs `onOpenRecord` on the list's page (where to navigate) and `onDone` on the form's page (where Done goes back to): `Tasks.jsx` and `EditTask.jsx` show both, with routes `/tasks/new` and `/tasks/:id` in `App.jsx`.
 

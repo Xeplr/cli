@@ -21,7 +21,7 @@
     "@xeplr/base-apis": "^2.0.0",
     "@xeplr/db": "^1.0.6",
     "@xeplr/factory": "^1.0.6",
-    "@xeplr/ui-factory": "^1.0.11",
+    "@xeplr/ui-factory": "^1.0.12",
     "@xeplr/utils": "^1.0.11",
     "dotenv": "^17.4.2",
     "express": "^5.2.0",
