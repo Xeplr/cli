@@ -12,7 +12,7 @@
     "@tanstack/react-table": "^8.21.3",
     "@xeplr/ui-account": "^1.0.9",
     "@xeplr/ui-canvas": "^1.0.2",
-    "@xeplr/ui-factory": "^1.0.9",
+    "@xeplr/ui-factory": "^1.0.11",
     "@xeplr/ui-table": "^1.0.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
