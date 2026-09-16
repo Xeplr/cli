@@ -25,6 +25,7 @@ The API (`@xeplr/base-apis`) and the sign-in service (`@xeplr/auth`), with this 
 | `routes/index.js` | this app's own routes — every data address under `/api` |
 | `routes/access.js` | who may design and publish forms (Super Admin) |
 | `screens/` | the forms this app ships with: per form, its spec, list and edit screens, server hooks and model — registered in `screens/index.js` |
+| `uploads/` | what people attach through a form's **file** field (`FACTORY_FILES_DIR`). Never committed, and never served: a file comes back only through the API's own route, which checks the caller the way reading a record does |
 | `migrations/` | hand-written SQL for tables no form owns |
 | `migrations-auth/` | this app's rows in the sign-in database — menus (by key), permissions |
 | `models/` | models for hand-written tables |

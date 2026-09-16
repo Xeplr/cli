@@ -57,6 +57,12 @@ AUTH_SUPER_ADMIN_PASSWORD=__ADMIN_PASSWORD__
 AUTH_ACTIVATION_URL=http://localhost:__UI_PORT__/auth/activate
 AUTH_INVITE_URL=http://localhost:__UI_PORT__/auth/accept-invite
 
+# ── Uploaded files ──
+# Where a form's FILE field puts what people upload. The path is what the
+# record stores; the file itself is served only through the API's own route,
+# which checks the caller the way reading a record does. Relative to api/.
+FACTORY_FILES_DIR=./uploads/factory
+
 # ── Email (optional) ──
 # Without it sign-in works, but activation, invite and password-reset links
 # cannot be sent. The sign-in service checks it at start and says so in its

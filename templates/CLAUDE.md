@@ -7,7 +7,7 @@ Read `api/node_modules/@xeplr/ui-factory/AUTHORING.md` for what screens, hooks a
 
 ## Create a new UI
 
-A new UI is a **form**: a list, and an add / edit form it opens in a popup, saved in its own table. Use the singular for `<form>` (`farming_department`), the plural for the page (`FarmingDepartments`).
+A new UI is a **form**: a list, and an add / edit form it opens — on a page of its own (like Tasks) or in a popup — saved in its own table. Use the singular for `<form>` (`farming_department`), the plural for the page (`FarmingDepartments`).
 
 Create every file below — the hooks and the model run the defaults (`super`) until the request needs more.
 
@@ -32,18 +32,28 @@ Then change only what the request asks for:
 | the request says… | change |
 |---|---|
 | a field, label, rule, dropdown, layout, colour | the screen JSON → validate → publish in Configure UI → Forms (or, never published yet, restart the API) |
-| hide / filter rows on screen, an extra button on each row, fill in a value before saving | front-end hooks — `ui/src/pages/Edit<Form>.jsx` |
+| hide / filter rows on screen, an extra button on each row, fill in a value before saving, check something before Next moves on | front-end hooks — `ui/src/pages/Edit<Form>.jsx` (`get`, `save`, `delete`, `actions`, `step`) |
 | must / only if / check against / email when / only managers see | server hooks — `api/screens/<form>/<form>.hooks.js` |
 | store as / convert / comma-separated ↔ array / work out X from Y | server model — `api/screens/<form>/<form>.model.js` |
 | a query in your own server code | `factory.table('<forms table>')` — this company, active rows, the model applied |
 
 **Without code:** Super Admin can also make a form in **Configure UI → Forms** (settings menu, top right): New form (label + key) → design → Publish → Add to menu. It gets no page, hooks or model files; add them with the steps above when it needs them.
 
+### The controls a field can be
+
+`text` (default), `textarea`, `number`, `date`, `datetime`, `checkbox`, `dropdown`, `radio`, `multiselect`, `file`, plus `stepper` and `label`. The sample uses every one — read `api/screens/task/task.entity.json` for how each is written. Three are worth knowing about:
+
+- **`multiselect`** — several ids in ONE text column, comma separated, and an array in your code. An option's id may not contain a comma.
+- **`file`** — the column holds the **path**, never the file. Say which extensions (`"accept": ".pdf,.docx"`) and how large (`"maxSize": 10`, in MB); the API enforces both, by extension, and keeps the file under `FACTORY_FILES_DIR`. Uploading needs `multer` in `api/` (already in package.json).
+- **`stepper`** — a journey across the top. Every other field says which step it is on (`"step": "Planning"`), and one without a `step` shows on every step. `step(ctx)` in the front-end hooks runs before each move.
+
+**A list opens its form on a page or in a popup** — `"openIn": "page"` in the entity spec, or Configure UI → Forms → the list. A page needs `onOpenRecord` on the list's page (where to navigate) and `onDone` on the form's page (where Done goes back to): `Tasks.jsx` and `EditTask.jsx` show both, with routes `/tasks/new` and `/tasks/:id` in `App.jsx`.
+
 **Keys and labels.** A form's key names its screens and table and never changes once published; its label is the screens' name. A menu item's key (`menus.name`) is what `drawerItems` matches; its label is what the rail shows, renamed in Configure UI → Menu. Code only ever uses keys.
 
 ### The prompt
 
-> Create a new UI for **farming departments**. One record is a farming department with: **Name** (required), **Region** (dropdown: North, South, East, West), **Area in acres** (number, at least 0), **Started on** (date), **Notes** (long text). Show Name, Region and Area in the list. Follow "Create a new UI" in CLAUDE.md.
+> Create a new UI for **farming departments**. One record is a farming department with: **Name** (required), **Region** (dropdown: North, South, East, West), **Area in acres** (number, at least 0), **Started on** (date), **Certifications** (choose several: Organic, Fair trade, Rainforest), **Inspection at** (date and time), **Licence** (file: .pdf or .jpg), **Notes** (long text). Show Name, Region and Area in the list. Follow "Create a new UI" in CLAUDE.md.
 
 Replace the bold parts. Add behaviour in the same message if you want it — "a Mark active button on each row", "Region is required when Area is over 100", "store tags as an array".
 

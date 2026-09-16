@@ -4,6 +4,7 @@
 // module holds its HOOKS, used by this page, by the Tasks list and by the
 // popup the list opens.
 import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { FactoryScreen, FactoryHooks } from '@xeplr/ui-factory'
 import { factory } from '../api/factory.js'
 
@@ -35,6 +36,15 @@ export class TaskHooks extends FactoryHooks {
     return super.delete(record, ctx)
   }
 
+  /**
+   * Before a stepper moves — Next, Back, or a click on the bar.
+   * Return false to stay where you are, or a step number to go there instead.
+   * The step's own required fields are checked before this runs.
+   */
+  step(ctx) {
+    return super.step(ctx)
+  }
+
   /** Extra row buttons beside Edit / Delete: [{ label, onClick: (record, ctx) => … }]. ctx.refresh() reloads. */
   actions(ctx) {
     return super.actions(ctx)
@@ -43,15 +53,41 @@ export class TaskHooks extends FactoryHooks {
 
 export const taskHooks = new TaskHooks()
 
-/** The task form on a page of its own: <EditTask /> for a new task, <EditTask record={task} /> for one. */
+/**
+ * The task form on a page of its own — /tasks/new, or /tasks/:id for a task
+ * that exists. The list sends people here (its "Opens in" is a page), and
+ * Done brings them back.
+ *
+ * There is no Save button: the form saves itself a moment after each change.
+ * Done only waits for anything still in flight, then leaves.
+ */
 export default function EditTask({ record }) {
+  const { id } = useParams()
+  const navigate = useNavigate()
   const [screen, setScreen] = useState(null)
+  const [task, setTask] = useState(record || null)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     factory.loadScreen('task_edit').then(setScreen, (e) => setError(e.message))
   }, [])
 
+  // The record as it is NOW, through the server's get hooks — not a copy the
+  // list happened to have.
+  useEffect(() => {
+    if (record || !id || id === 'new') return
+    factory.fetchRecord({ screen: 'task_edit', id }).then(setTask, (e) => setError(e.message))
+  }, [id, record])
+
   if (error) return <div className="app-error">Could not load the task form — {error}</div>
-  return screen ? <FactoryScreen document={screen} record={record} {...factory.screenProps} hooks={taskHooks} /> : null
+  if (!screen || (id && id !== 'new' && !task)) return null
+  return (
+    <FactoryScreen
+      document={screen}
+      record={task}
+      {...factory.screenProps}
+      hooks={taskHooks}
+      onDone={() => navigate('/tasks')}
+    />
+  )
 }

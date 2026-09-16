@@ -61,7 +61,15 @@ async function start() {
   // The screens, their hooks and their models. A hooks file with a typo
   // ("beforeSave") or a malformed model stops startup here, rather than
   // silently never running.
-  await factory.init({ knex: knex, hooks: screens.hooks, models: screens.models });
+  // filesDir: where a form's file field puts what people upload. Nothing is
+  // served from it — a file comes back only through the factory's own route,
+  // which checks the caller the way reading a record does.
+  await factory.init({
+    knex: knex,
+    hooks: screens.hooks,
+    models: screens.models,
+    filesDir: process.env.FACTORY_FILES_DIR
+  });
 
   // Screens never published yet are published now, creating their tables.
   // Ones already published are left alone — Configure UI → Forms owns them.

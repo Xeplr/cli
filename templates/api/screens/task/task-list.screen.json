@@ -23,6 +23,7 @@
           "edit",
           "delete"
         ],
+        "openIn": "page",
         "editScreen": "task_edit",
         "columns": [
           {
@@ -34,8 +35,16 @@
             "label": "Status"
           },
           {
+            "field": "priority",
+            "label": "Priority"
+          },
+          {
             "field": "dueDate",
             "label": "Due date"
+          },
+          {
+            "field": "tags",
+            "label": "Tags"
           }
         ]
       }

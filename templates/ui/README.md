@@ -17,7 +17,7 @@ npm run build     # → dist/
 | `src/App.jsx` | routes, the side rail (`drawerItems`) and the settings menu (`settingsOverrides`) — **by key**, never by label |
 | `src/menu.js` | every menu key this app uses; forms added to the menu are `form:<key>` |
 | `src/api/factory.js` | the calls to the API's forms routes |
-| `src/pages/Tasks.jsx` | the sample list; `EditTask.jsx` holds the task form's **front-end hooks** (`TaskHooks extends FactoryHooks` — every method calls `super`) |
+| `src/pages/Tasks.jsx` | the sample list. It opens records on a **page** (`onOpenRecord` → `/tasks/new`, `/tasks/:id`), and `EditTask.jsx` is that page — it also holds the task form's **front-end hooks** (`TaskHooks extends FactoryHooks` — every method calls `super`, including `step`, run before a stepper moves) and sends **Done** back to the list |
 | `src/pages/ConfigureUI.jsx` | Configure UI (Super Admin): `Forms.jsx` and `MenuSettings.jsx` tabs; `FormDesigner.jsx` designs one form |
 | `src/pages/FormRecords.jsx` | opens any published form — what a form added to the menu links to |
 

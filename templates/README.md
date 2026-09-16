@@ -24,7 +24,7 @@ Open http://localhost:__UI_PORT__ and sign in as `__ADMIN_EMAIL__`.
 ## What is in it
 
 - **Sign-in** — login, register, password reset, profile, and the admin screens for users, roles and permissions (`@xeplr/auth`, `@xeplr/ui-account`).
-- **Tasks** — a sample built from screens: a list, and a form it opens in a popup, saved into an ordinary `tasks` table.
+- **Tasks** — a sample built from screens: a list, and a form it opens on a page of its own, saved into an ordinary `tasks` table. The form is filled in over three steps and uses every control there is — text, a dropdown, radio buttons, a tick box, a date, a date and time, several tags at once, and a file.
 - **Configure UI** — in the settings menu, for Super Admin: every form (make one, design it, publish it, add it to the side rail) and the side rail itself (rename, reorder, hide).
 
 ## Create a new UI

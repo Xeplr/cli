@@ -3,6 +3,7 @@ import { Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom'
 import { authRoutes, authPath, NavPage, ProtectedRoute, useAccess } from '@xeplr/ui-account'
 import Home from './pages/Home.jsx'
 import Tasks from './pages/Tasks.jsx'
+import EditTask from './pages/EditTask.jsx'
 import ConfigureUI from './pages/ConfigureUI.jsx'
 import { FORM_MENU_PREFIX } from './menu.js'
 import FormDesigner from './pages/FormDesigner.jsx'
@@ -105,6 +106,9 @@ __MT_SELECT_ROUTE__
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<Home />} />
         <Route path="/tasks" element={<Tasks />} />
+        {/* The task list opens its form on a page — see Tasks.jsx's onOpenRecord. */}
+        <Route path="/tasks/new" element={<EditTask />} />
+        <Route path="/tasks/:id" element={<EditTask />} />
         <Route path="/forms/:form" element={<FormRecords />} />
         <Route path="/configure" element={<ConfigureUI />} />
         <Route path="/configure/forms/:form/design/:part" element={<FormDesigner />} />

@@ -385,10 +385,46 @@ test('front-end hooks: the task module holds them, every method calling super, a
   generate.generate(answers(), dir);
   var edit = fs.readFileSync(path.join(dir, 'ui/src/pages/EditTask.jsx'), 'utf8');
   assert.match(edit, /export class TaskHooks extends FactoryHooks/);
-  assert.strictEqual((edit.match(/return super\./g) || []).length, 4, 'get, save, delete, actions all call super');
+  assert.strictEqual((edit.match(/return super\./g) || []).length, 5, 'get, save, delete, step, actions all call super');
   var tasks = fs.readFileSync(path.join(dir, 'ui/src/pages/Tasks.jsx'), 'utf8');
   assert.match(tasks, /import \{ taskHooks \} from '\.\/EditTask\.jsx'/);
   assert.match(tasks, /hooks=\{taskHooks\}/);
+});
+
+test('the sample form uses every control, over steps, and opens on a page of its own', function () {
+  var dir = path.join(tmpdir(), 'demo');
+  generate.generate(answers(), dir);
+  var edit = JSON.parse(fs.readFileSync(path.join(dir, 'api/screens/task/task-edit.screen.json'), 'utf8'));
+  var types = edit.nodes.map(function (n) { return n.type; });
+  ['stepper', 'text', 'dropdown', 'radio', 'textarea', 'date', 'datetime', 'multiselect', 'checkbox', 'file'].forEach(function (t) {
+    assert.ok(types.indexOf(t) !== -1, 'the task form has a ' + t);
+  });
+  var bar = edit.nodes.find(function (n) { return n.type === 'stepper'; });
+  assert.strictEqual(bar.props.steps.length, 3);
+  // Every field is on a step, and each step starts at the same height.
+  var fields = edit.nodes.filter(function (n) { return n.props.name; });
+  assert.ok(fields.every(function (n) { return n.step && n.step.of === bar.id; }), 'every field belongs to a step');
+  assert.ok(fields.some(function (n) { return n.step.index === 2; }), 'the last step has a field');
+
+  var file = fields.find(function (n) { return n.type === 'file'; });
+  assert.match(file.props.accept, /\.pdf/);
+  assert.ok(file.props.maxSize > 0);
+
+  // The list sends Edit / New to a page, and the app knows where that is.
+  var list = JSON.parse(fs.readFileSync(path.join(dir, 'api/screens/task/task-list.screen.json'), 'utf8'));
+  assert.strictEqual(list.nodes[0].props.openIn, 'page');
+  assert.match(fs.readFileSync(path.join(dir, 'ui/src/pages/Tasks.jsx'), 'utf8'), /onOpenRecord=/);
+  var editPage = fs.readFileSync(path.join(dir, 'ui/src/pages/EditTask.jsx'), 'utf8');
+  assert.match(editPage, /onDone=\{\(\) => navigate\('\/tasks'\)\}/);
+  var app = fs.readFileSync(path.join(dir, 'ui/src/App.jsx'), 'utf8');
+  assert.match(app, /path="\/tasks\/new"/);
+  assert.match(app, /path="\/tasks\/:id"/);
+
+  // Uploads: somewhere to put them, multer to receive them, and never committed.
+  assert.match(fs.readFileSync(path.join(dir, 'api/development.env'), 'utf8'), /FACTORY_FILES_DIR=/);
+  assert.match(fs.readFileSync(path.join(dir, 'api/bin/www'), 'utf8'), /filesDir: process\.env\.FACTORY_FILES_DIR/);
+  assert.match(fs.readFileSync(path.join(dir, 'api/package.json'), 'utf8'), /"multer"/);
+  assert.match(fs.readFileSync(path.join(dir, 'api/.gitignore'), 'utf8'), /uploads\//);
 });
 
 test('a new UI is described for Claude: CLAUDE.md with the recipe and the prompt, and the task model is wired in', function () {

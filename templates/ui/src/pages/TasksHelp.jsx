@@ -5,7 +5,7 @@ import { useState } from 'react'
 // and find.
 
 // The same prompt as in CLAUDE.md. Replace the form and its fields.
-const PROMPT = 'Create a new UI for farming departments. One record is a farming department with: Name (required), Region (dropdown: North, South, East, West), Area in acres (number, at least 0), Started on (date), Notes (long text). Show Name, Region and Area in the list. Follow "Create a new UI" in CLAUDE.md.'
+const PROMPT = 'Create a new UI for farming departments. One record is a farming department with: Name (required), Region (dropdown: North, South, East, West), Area in acres (number, at least 0), Started on (date), Certifications (choose several: Organic, Fair trade, Rainforest), Inspection at (date and time), Licence (file: .pdf or .jpg), Notes (long text). Show Name, Region and Area in the list. Follow "Create a new UI" in CLAUDE.md.'
 
 export default function TasksHelp() {
   const [copied, setCopied] = useState(false)
@@ -37,10 +37,18 @@ export default function TasksHelp() {
 
       <h3>This page is an example</h3>
       <p>
-        A task has a title, a status, a due date and a description. Neither the
-        list nor the form is written by hand — both are <strong>screens</strong>,
-        and the tasks are saved in an ordinary <code>tasks</code> table with one
-        column per field.
+        A task is filled in over three steps — the task, planning, an
+        attachment — and shows every kind of control there is: text, a
+        dropdown, radio buttons, a tick box, dates, a date and time, several
+        tags at once, and a file. Neither the list nor the form is written by
+        hand: both are <strong>screens</strong>, and a task is saved in an
+        ordinary <code>tasks</code> table with one column per field. The file
+        itself is kept outside the database, and its column holds the path.
+      </p>
+      <p>
+        <strong>New</strong> and <strong>Edit</strong> open the form on a page
+        of its own, and <strong>Done</strong> comes back here. A list can open
+        it in a popup instead — that is its <strong>Opens in</strong> setting.
       </p>
 
       <h3>Change it</h3>
