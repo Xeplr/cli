@@ -34,4 +34,6 @@ router.get('/whoami', function(req, res) {
 //   var { genericRoute } = require('@xeplr/base-apis');
 //   router.use('/api/things', genericRoute({ key: 'thing', model: require('../models').Thing }));
 
+__WF_API_ROUTE__
+
 module.exports = router;

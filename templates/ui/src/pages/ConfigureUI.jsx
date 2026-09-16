@@ -3,15 +3,18 @@
 //   Forms  every UI in the app: make one, design it, publish it, open it, add it
 //          to the side rail
 //   Menu   the side rail's items: rename, reorder, hide
+__WF_TAB_NOTE__
 //
 // Configuration lives here, not in the side rail — the rail is for the pages
 // people use.
 import { useSearchParams } from 'react-router-dom'
 import Forms from './Forms.jsx'
 import MenuSettings from './MenuSettings.jsx'
+__WF_TAB_IMPORT__
 
 const TABS = [
   { id: 'forms', label: 'Forms', Page: Forms },
+__WF_TAB__
   { id: 'menu', label: 'Menu', Page: MenuSettings }
 ]
 

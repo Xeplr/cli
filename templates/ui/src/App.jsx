@@ -4,6 +4,7 @@ import { authRoutes, authPath, NavPage, ProtectedRoute, useAccess } from '@xeplr
 import Home from './pages/Home.jsx'
 import Tasks from './pages/Tasks.jsx'
 import EditTask from './pages/EditTask.jsx'
+__WF_UI_IMPORTS__
 import ConfigureUI from './pages/ConfigureUI.jsx'
 import { FORM_MENU_PREFIX } from './menu.js'
 import FormDesigner from './pages/FormDesigner.jsx'
@@ -112,6 +113,7 @@ __MT_SELECT_ROUTE__
         <Route path="/forms/:form" element={<FormRecords />} />
         <Route path="/configure" element={<ConfigureUI />} />
         <Route path="/configure/forms/:form/design/:part" element={<FormDesigner />} />
+__WF_UI_ROUTES__
       </Route>
 
       <Route path="*" element={<Navigate to="/auth/login" replace />} />

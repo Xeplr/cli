@@ -34,6 +34,7 @@ Open http://localhost:__UI_PORT__ and sign in as `__ADMIN_EMAIL__`.
 
   > Create a new UI for farming departments. One record is a farming department with: Name (required), Region (dropdown: North, South, East, West), Area in acres (number, at least 0), Started on (date), Notes (long text). Show Name, Region and Area in the list. Follow "Create a new UI" in CLAUDE.md.
 
+__WF_README__
 ## Rules this app follows
 
 | Rule | Why |

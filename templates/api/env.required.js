@@ -25,5 +25,6 @@ module.exports = [
   // clean, migrates, serves traffic and reads as EMPTY DATA rather than as an
   // error — the most expensive way for this to go wrong.
   'DB_API',
-  '__PREFIX___CONNECTION'
+  '__PREFIX___CONNECTION',
+__WF_REQUIRED_ENV__
 ];

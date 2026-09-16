@@ -327,6 +327,55 @@ test('without tenancy the project has no trace of it', function () {
   });
 });
 
+test('without Workflow the project has no flows at all', function () {
+  var dir = path.join(tmpdir(), 'demo');
+  var result = generate.generate(answers({ workflow: null }), dir);
+  assert.ok(result.written.every(function (f) { return !/flow|journey/i.test(f); }), 'no flow files');
+  assert.doesNotMatch(fs.readFileSync(path.join(dir, 'README.md'), 'utf8'), /## Flows/);
+  result.written.forEach(function (rel) {
+    if (/\.(svg|png)$/.test(rel)) return;
+    assert.doesNotMatch(fs.readFileSync(path.join(dir, rel), 'utf8'), /WORKFLOW_URL|\/api\/flows|FlowDesigner|<Journey|__WF_/, rel);
+  });
+  // Nothing left behind where a token was: the list still closes cleanly.
+  assert.match(fs.readFileSync(path.join(dir, 'api', 'env.required.js'), 'utf8'), /'DEMO_CONNECTION',\n\];/);
+});
+
+test('with Workflow: flows forwarded to it, designed in Configure UI, walked at /journey', function () {
+  var dir = path.join(tmpdir(), 'demo');
+  var result = generate.generate(answers({ workflow: { url: 'http://localhost:19122', dir: '/srv/xeplr-workflow/backend' } }), dir);
+  var read = function (rel) { return fs.readFileSync(path.join(dir, rel), 'utf8'); };
+
+  ['api/routes/flows.js', 'ui/src/api/flows.js', 'ui/src/pages/Flows.jsx', 'ui/src/pages/FlowDesigner.jsx', 'ui/src/pages/Journey.jsx'].forEach(function (rel) {
+    assert.ok(result.written.indexOf(rel) !== -1, rel + ' is written');
+  });
+  var env = read('api/development.env');
+  assert.match(env, /^WORKFLOW_URL=http:\/\/localhost:19122$/m);
+  // Workflow's access rules load into this app's sign-in, after the app's own.
+  assert.match(env, /^XEPLR_AUTH_MIGRATIONS=.*,\.\/migrations-auth,\/srv\/xeplr-workflow\/backend\/migrations-auth$/m);
+  assert.match(read('api/env.required.js'), /^  'WORKFLOW_URL',$/m, 'WORKFLOW_URL is required');
+  assert.match(read('api/routes/index.js'), /router\.use\('\/api\/flows', require\('\.\/flows'\)\)/);
+  assert.match(read('ui/src/App.jsx'), /path="\/journey\/:flow\/:run"/);
+  assert.match(read('ui/src/App.jsx'), /path="\/configure\/flows\/:flow"/);
+  assert.match(read('ui/src/pages/ConfigureUI.jsx'), /\{ id: 'flows', label: 'Flows', Page: Flows \}/);
+
+  // The forwarder: who is asking goes through, cookies do not, and a missing
+  // URL says so rather than failing somewhere else.
+  var forward = read('api/routes/flows.js');
+  assert.match(forward, /authorization\|content-type\|accept\|x-/);
+  assert.match(forward, /WORKFLOW_URL is empty/);
+
+  // The README says the one thing that must be true: Workflow shares this sign-in.
+  var readme = read('README.md')
+  assert.match(readme, /## Flows/);
+  assert.match(readme, /AUTH_URL=http:\/\/localhost:19201/);
+  assert.match(readme, /AUTH_DB_NAME=demo_auth/);
+
+  // Without Workflow's folder the access rules are left out, not half-written.
+  var dir2 = path.join(tmpdir(), 'demo2');
+  generate.generate(answers({ workflow: { url: 'http://localhost:19122', dir: '' } }), dir2);
+  assert.match(fs.readFileSync(path.join(dir2, 'api/development.env'), 'utf8'), /^XEPLR_AUTH_MIGRATIONS=\.\/node_modules\/@xeplr\/factory\/migrations-auth,\.\/migrations-auth$/m);
+});
+
 test('with tenancy: levels registered on both sides, tables, picker first, membership checked', function () {
   var dir = path.join(tmpdir(), 'demo');
   var result = generate.generate(answers({ tenancy: questions.tenancyLevels('company, workspace') }), dir);

@@ -26,9 +26,11 @@ Already working, with nothing to wire up:
   open is named explicitly; there is no way to leave the whole thing public by
   forgetting.
 - **A sample built with the screen designer** — a task list whose New and Edit
-  open the task form in a popup, saving as you type into an ordinary `tasks`
-  table. Neither is written by hand: both are screens
-  ([`@xeplr/ui-factory`](https://www.npmjs.com/package/@xeplr/ui-factory)),
+  open the task form on a page of its own, filled in over three steps and saving
+  as you type into an ordinary `tasks` table. It uses every control there is:
+  text, dropdown, radio buttons, tick box, date, date and time, a multi-select
+  and a file upload. Neither the list nor the form is written by hand: both are
+  screens ([`@xeplr/ui-factory`](https://www.npmjs.com/package/@xeplr/ui-factory)),
   published when the API first starts.
 - **Configure UI** for Super Admin, in the settings menu (top right) — not in
   the side rail, which is for the pages people use:
@@ -39,6 +41,9 @@ Already working, with nothing to wire up:
   - **Menu**: rename, reorder and hide the side rail's items.
 
   Nobody else sees it, and the API refuses everyone else.
+- **Flows, if you run Xeplr Workflow** — your forms one after another, where
+  what someone fills in decides the next screen. Designed in Configure UI →
+  Flows, walked at `/journey/<key>`, and resumable, since Workflow keeps the run.
 - **Multi-tenancy, if you ask for it** — companies (or companies and
   workspaces, up to four levels). Every row is stamped with the one it was made
   in, every read sees only its rows, membership is checked on every request,
@@ -53,8 +58,10 @@ Already working, with nothing to wire up:
 
   > Create a new UI for farming departments. One record is a farming department
   > with: Name (required), Region (dropdown: North, South, East, West), Area in
-  > acres (number, at least 0), Started on (date), Notes (long text). Show Name,
-  > Region and Area in the list. Follow "Create a new UI" in CLAUDE.md.
+  > acres (number, at least 0), Started on (date), Certifications (choose several:
+  > Organic, Fair trade, Rainforest), Inspection at (date and time), Licence
+  > (file: .pdf or .jpg), Notes (long text). Show Name, Region and Area in the
+  > list. Follow "Create a new UI" in CLAUDE.md.
 
 ## Rules the generated app follows
 
@@ -129,8 +136,10 @@ Two ways, both in the running app's project:
 
   > Create a new UI for farming departments. One record is a farming department
   > with: Name (required), Region (dropdown: North, South, East, West), Area in
-  > acres (number, at least 0), Started on (date), Notes (long text). Show Name,
-  > Region and Area in the list. Follow "Create a new UI" in CLAUDE.md.
+  > acres (number, at least 0), Started on (date), Certifications (choose several:
+  > Organic, Fair trade, Rainforest), Inspection at (date and time), Licence
+  > (file: .pdf or .jpg), Notes (long text). Show Name, Region and Area in the
+  > list. Follow "Create a new UI" in CLAUDE.md.
 
   Claude follows `CLAUDE.md`: the screens and server hooks and model
   (`npx xeplr-factory screens … --no-pages`), the page with its front-end hooks,
@@ -189,9 +198,16 @@ no defaults, ever.
 | Super admin email | the account you sign in with |
 | Super admin password | its password |
 | Multi-tenant? | no — or the levels, outermost first: `company`, `company, workspace` |
+| Flows — is Xeplr Workflow running? | no — or its address (`http://localhost:19122`) and its backend folder. Yes adds **Configure UI → Flows**, a `/journey/<key>` page, and `/api/flows` forwarded to Workflow |
 | Database connection | host, port, user, password — or skip, and fill it in later |
 
 Encryption keys and signing secrets are **generated, never asked**.
+
+**Flows need Workflow to share the app's sign-in.** Workflow is a separate
+service, not a package the project installs: set its `AUTH_URL` and
+`AUTH_DB_NAME` to the new app's, and the app's sign-in service loads Workflow's
+access rules from the folder you gave. The generated README says exactly which
+values.
 
 ## Licence
 

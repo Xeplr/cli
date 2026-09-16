@@ -42,7 +42,7 @@ AUTH_URL=http://localhost:__AUTH_PORT__
 
 # Sign-in setup files: the screens' permissions (@xeplr/factory's), then this
 # app's own — menu entries and anything else it adds. Comma-separated, in order.
-XEPLR_AUTH_MIGRATIONS=./node_modules/@xeplr/factory/migrations-auth,./migrations-auth
+XEPLR_AUTH_MIGRATIONS=./node_modules/@xeplr/factory/migrations-auth,./migrations-auth__WF_AUTH_MIGRATIONS__
 
 # ── The first account you sign in with ──
 # Created for you when you set up the database. Change the password here and
@@ -57,6 +57,7 @@ AUTH_SUPER_ADMIN_PASSWORD=__ADMIN_PASSWORD__
 AUTH_ACTIVATION_URL=http://localhost:__UI_PORT__/auth/activate
 AUTH_INVITE_URL=http://localhost:__UI_PORT__/auth/accept-invite
 
+__WF_ENV__
 # ── Uploaded files ──
 # Where a form's FILE field puts what people upload. The path is what the
 # record stores; the file itself is served only through the API's own route,
