@@ -198,7 +198,7 @@ no defaults, ever.
 | Super admin email | the account you sign in with |
 | Super admin password | its password |
 | Multi-tenant? | no — or the levels, outermost first: `company`, `company, workspace` |
-| Flows — is Xeplr Workflow running? | no — or its address (`http://localhost:19122`) and its backend folder. Yes adds **Configure UI → Flows**, a `/journey/<key>` page, and `/api/flows` forwarded to Workflow |
+| Flows — is Xeplr Workflow running? | no — or its address (`http://localhost:19122`) and its backend folder. Yes adds **Configure UI → Flows**, a `/journey/<key>` page, and `/api/flows` forwarded to Workflow — and sets multi-tenancy to Workflow's own levels, company then workspace, since it keeps every journey inside both |
 | Database connection | host, port, user, password — or skip, and fill it in later |
 
 Encryption keys and signing secrets are **generated, never asked**.

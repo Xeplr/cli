@@ -327,6 +327,18 @@ test('without tenancy the project has no trace of it', function () {
   });
 });
 
+test('flows without multi-tenancy are refused, because Workflow files every journey under a company', function () {
+  var dir = path.join(tmpdir(), 'demo');
+  assert.throws(function () {
+    generate.generate(answers({ tenancy: [], workflow: { url: 'http://localhost:19122', dir: '' } }), dir);
+  }, /Flows need the same multi-tenancy as Xeplr Workflow/);
+  // One level is not enough: Workflow also files every journey under a workspace.
+  assert.throws(function () {
+    generate.generate(answers({ tenancy: questions.tenancyLevels('company'), workflow: { url: 'http://localhost:19122', dir: '' } }), dir);
+  }, /company, workspace/);
+  assert.ok(!fs.existsSync(dir), 'nothing is written');
+});
+
 test('without Workflow the project has no flows at all', function () {
   var dir = path.join(tmpdir(), 'demo');
   var result = generate.generate(answers({ workflow: null }), dir);
@@ -342,7 +354,7 @@ test('without Workflow the project has no flows at all', function () {
 
 test('with Workflow: flows forwarded to it, designed in Configure UI, walked at /journey', function () {
   var dir = path.join(tmpdir(), 'demo');
-  var result = generate.generate(answers({ workflow: { url: 'http://localhost:19122', dir: '/srv/xeplr-workflow/backend' } }), dir);
+  var result = generate.generate(answers({ tenancy: questions.tenancyLevels('company, workspace'), workflow: { url: 'http://localhost:19122', dir: '/srv/xeplr-workflow/backend' } }), dir);
   var read = function (rel) { return fs.readFileSync(path.join(dir, rel), 'utf8'); };
 
   ['api/routes/flows.js', 'ui/src/api/flows.js', 'ui/src/pages/Flows.jsx', 'ui/src/pages/FlowDesigner.jsx', 'ui/src/pages/Journey.jsx'].forEach(function (rel) {
@@ -372,7 +384,7 @@ test('with Workflow: flows forwarded to it, designed in Configure UI, walked at 
 
   // Without Workflow's folder the access rules are left out, not half-written.
   var dir2 = path.join(tmpdir(), 'demo2');
-  generate.generate(answers({ workflow: { url: 'http://localhost:19122', dir: '' } }), dir2);
+  generate.generate(answers({ tenancy: questions.tenancyLevels('company, workspace'), workflow: { url: 'http://localhost:19122', dir: '' } }), dir2);
   assert.match(fs.readFileSync(path.join(dir2, 'api/development.env'), 'utf8'), /^XEPLR_AUTH_MIGRATIONS=\.\/node_modules\/@xeplr\/factory\/migrations-auth,\.\/migrations-auth$/m);
 });
 
