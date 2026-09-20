@@ -3,18 +3,19 @@
 //   Forms  every UI in the app: make one, design it, publish it, open it, add it
 //          to the side rail
 //   Menu   the side rail's items: rename, reorder, hide
-__WF_TAB_NOTE__
+//   Flows  forms one after another — what is filled in decides the next; run by
+//          Xeplr Workflow, and says how to connect it until it is
 //
 // Configuration lives here, not in the side rail — the rail is for the pages
 // people use.
 import { useSearchParams } from 'react-router-dom'
 import Forms from './Forms.jsx'
 import MenuSettings from './MenuSettings.jsx'
-__WF_TAB_IMPORT__
+import Flows from './Flows.jsx'
 
 const TABS = [
   { id: 'forms', label: 'Forms', Page: Forms },
-__WF_TAB__
+  { id: 'flows', label: 'Flows', Page: Flows },
   { id: 'menu', label: 'Menu', Page: MenuSettings }
 ]
 

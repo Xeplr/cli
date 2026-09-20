@@ -327,65 +327,79 @@ test('without tenancy the project has no trace of it', function () {
   });
 });
 
-test('flows without multi-tenancy are refused, because Workflow files every journey under a company', function () {
+test('every app has flows, run by @xeplr/workflow inside the API, in the app database', function () {
   var dir = path.join(tmpdir(), 'demo');
-  assert.throws(function () {
-    generate.generate(answers({ tenancy: [], workflow: { url: 'http://localhost:19122', dir: '' } }), dir);
-  }, /Flows need the same multi-tenancy as Xeplr Workflow/);
-  // One level is not enough: Workflow also files every journey under a workspace.
-  assert.throws(function () {
-    generate.generate(answers({ tenancy: questions.tenancyLevels('company'), workflow: { url: 'http://localhost:19122', dir: '' } }), dir);
-  }, /company, workspace/);
-  assert.ok(!fs.existsSync(dir), 'nothing is written');
-});
-
-test('without Workflow the project has no flows at all', function () {
-  var dir = path.join(tmpdir(), 'demo');
-  var result = generate.generate(answers({ workflow: null }), dir);
-  assert.ok(result.written.every(function (f) { return !/flow|journey/i.test(f); }), 'no flow files');
-  assert.doesNotMatch(fs.readFileSync(path.join(dir, 'README.md'), 'utf8'), /## Flows/);
-  result.written.forEach(function (rel) {
-    if (/\.(svg|png)$/.test(rel)) return;
-    assert.doesNotMatch(fs.readFileSync(path.join(dir, rel), 'utf8'), /WORKFLOW_URL|\/api\/flows|FlowDesigner|<Journey|__WF_/, rel);
-  });
-  // Nothing left behind where a token was: the list still closes cleanly.
-  assert.match(fs.readFileSync(path.join(dir, 'api', 'env.required.js'), 'utf8'), /'DEMO_CONNECTION',\n\];/);
-});
-
-test('with Workflow: flows forwarded to it, designed in Configure UI, walked at /journey', function () {
-  var dir = path.join(tmpdir(), 'demo');
-  var result = generate.generate(answers({ tenancy: questions.tenancyLevels('company, workspace'), workflow: { url: 'http://localhost:19122', dir: '/srv/xeplr-workflow/backend' } }), dir);
+  var result = generate.generate(answers({ tenancy: [] }), dir);
   var read = function (rel) { return fs.readFileSync(path.join(dir, rel), 'utf8'); };
 
-  ['api/routes/flows.js', 'ui/src/api/flows.js', 'ui/src/pages/Flows.jsx', 'ui/src/pages/FlowDesigner.jsx', 'ui/src/pages/Journey.jsx'].forEach(function (rel) {
+  ['api/routes/flows.js', 'ui/src/api/flows.js', 'ui/src/pages/Flows.jsx', 'ui/src/pages/FlowsHome.jsx', 'ui/src/pages/FlowDesigner.jsx', 'ui/src/pages/Journey.jsx'].forEach(function (rel) {
     assert.ok(result.written.indexOf(rel) !== -1, rel + ' is written');
   });
+  // The version the app installs — 1.1.0 is where embedding (its own database,
+  // the host's tenancy and permissions) and the 2.0 condition language landed.
+  assert.match(read('api/package.json'), /"@xeplr\/workflow": "\^1\.1\.0"/);
+
+  // Started in ONE place (api/workflow.js), in the app's own database,
+  // following its tenancy — by the API, or on its own port.
+  var start = read('api/workflow.js');
+  assert.match(start, /registerWorkflow\(\{/);
+  assert.match(start, /name: process\.env\.DB_API,/);
+  assert.match(start, /connection: process\.env\.DEMO_CONNECTION,/);
+  assert.match(start, /migrationsTable: 'workflow_migrations'/);
+  assert.match(start, /tenantTables: false,/);
+  assert.match(start, /access: true,/);
+  var www = read('api/bin/www');
+  assert.match(www, /if \(process\.env\.WORKFLOW_PORT\) \{/, 'with a port, the API leaves it to its own process');
+  assert.match(www, /require\('\.\.\/routes\/flows'\)\.mount\(await require\('\.\.\/workflow'\)\(buildApp\.memberGate\)\)/);
+  assert.match(read('api/bin/workflow'), /'\/api\/workflow\/flows': flowsRouter/);
+  assert.match(read('api/bin/workflow'), /WORKFLOW_PORT is blank/);
+  assert.ok(fs.statSync(path.join(dir, 'api/bin/workflow')).mode & 0o111 || true);
+  assert.match(read('api/package.json'), /"start-workflow": "node \.\/bin\/workflow"/);
+  assert.match(read('api/routes/index.js'), /router\.use\('\/api\/workflow\/flows', require\('\.\/flows'\)\)/);
+  assert.match(read('ui/src/api/flows.js'), /base: '\/api\/workflow'/);
+
+  // Ports and addresses are SETTINGS: blank = inside the API.
   var env = read('api/development.env');
-  assert.match(env, /^WORKFLOW_URL=http:\/\/localhost:19122$/m);
-  // Workflow's access rules load into this app's sign-in, after the app's own.
-  assert.match(env, /^XEPLR_AUTH_MIGRATIONS=.*,\.\/migrations-auth,\/srv\/xeplr-workflow\/backend\/migrations-auth$/m);
-  assert.match(read('api/env.required.js'), /^  'WORKFLOW_URL',$/m, 'WORKFLOW_URL is required');
-  assert.match(read('api/routes/index.js'), /router\.use\('\/api\/flows', require\('\.\/flows'\)\)/);
-  assert.match(read('ui/src/App.jsx'), /path="\/journey\/:flow\/:run"/);
-  assert.match(read('ui/src/App.jsx'), /path="\/configure\/flows\/:flow"/);
+  assert.match(env, /^WORKFLOW_PORT=$/m);
+  assert.match(env, /next free port: 19203/);
+  assert.doesNotMatch(env, /WORKFLOW_TENANT|DB_WORKFLOW/);
+  var uiEnv = read('ui/.env');
+  assert.match(uiEnv, /^WORKFLOW_URL=$/m);
+  assert.match(read('ui/vite.config.js'), /'\/api\/workflow': env\.WORKFLOW_URL \|\| apiUrl/);
+  var prod = read('api/production.env.example');
+  assert.match(prod, /^WORKFLOW_PORT=$/m);
+  assert.match(prod, /^ENCRYPTION_KEY=$/m, 'no secret in the example');
+  assert.match(read('api/.gitignore'), /^development\.env$/m);
+  assert.match(read('api/.gitignore'), /^production\.env$/m);
+  assert.match(read('README.md'), /location \/api\/workflow\/ \{ proxy_pass http:\/\/127\.0\.0\.1:19202; \}/);
+  assert.match(read('README.md'), /npm run start-workflow   # flows            http:\/\/localhost:19203/);
+  assert.match(env, /^XEPLR_AUTH_MIGRATIONS=.*,\.\/migrations-auth,\.\/node_modules\/@xeplr\/workflow\/migrations-auth$/m);
+  assert.match(read('api/env.required.js'), /'DEMO_CONNECTION',\n\];/, 'the required list is unchanged');
+  assert.doesNotMatch(read('api/routes/flows.js'), /fetch\(/, 'no forwarding to another server');
+  assert.doesNotMatch(read('ui/src/pages/Flows.jsx'), /Connect Xeplr Workflow|WORKFLOW_NOT_CONNECTED/);
+
+  // In the rail and in Configure UI.
+  assert.match(read('ui/src/App.jsx'), /\{ key: 'Flows', icon: FlowsIcon, path: '\/flows'/);
   assert.match(read('ui/src/pages/ConfigureUI.jsx'), /\{ id: 'flows', label: 'Flows', Page: Flows \}/);
+  assert.match(read('api/migrations-auth/0005_flows_menu.sql'), /'Flows', '', true, true/);
 
-  // The forwarder: who is asking goes through, cookies do not, and a missing
-  // URL says so rather than failing somewhere else.
-  var forward = read('api/routes/flows.js');
-  assert.match(forward, /authorization\|content-type\|accept\|x-/);
-  assert.match(forward, /WORKFLOW_URL is empty/);
+  // No tenancy forced, none invented.
+  assert.ok(result.written.every(function (f) { return !/tenan|SelectScope/i.test(f); }), 'still no tenancy files');
+  var readme = read('README.md');
+  assert.match(readme, /## Flows[\s\S]*inside this API/);
+  assert.match(readme, /none, like the rest of this app/);
+  assert.doesNotMatch(read('README.md') + read('api/routes/flows.js'), /__[A-Z_]+__/, 'no token left behind');
+});
 
-  // The README says the one thing that must be true: Workflow shares this sign-in.
-  var readme = read('README.md')
-  assert.match(readme, /## Flows/);
-  assert.match(readme, /AUTH_URL=http:\/\/localhost:19201/);
-  assert.match(readme, /AUTH_DB_NAME=demo_auth/);
-
-  // Without Workflow's folder the access rules are left out, not half-written.
-  var dir2 = path.join(tmpdir(), 'demo2');
-  generate.generate(answers({ tenancy: questions.tenancyLevels('company, workspace'), workflow: { url: 'http://localhost:19122', dir: '' } }), dir2);
-  assert.match(fs.readFileSync(path.join(dir2, 'api/development.env'), 'utf8'), /^XEPLR_AUTH_MIGRATIONS=\.\/node_modules\/@xeplr\/factory\/migrations-auth,\.\/migrations-auth$/m);
+test('in a multi-tenant app, flows follow its tenancy', function () {
+  var dir = path.join(tmpdir(), 'demo');
+  generate.generate(answers({ tenancy: questions.tenancyLevels('company') }), dir);
+  var read = function (rel) { return fs.readFileSync(path.join(dir, rel), 'utf8'); };
+  assert.match(read('api/workflow.js'), /mtMembershipGate: memberGate/);
+  assert.match(read('api/app.js'), /var memberGate = tenants\.memberGate;/);
+  // Its own process runs the same tenancy middleware as the API.
+  assert.match(read('api/app.js'), /module\.exports\.middleware = function\(\) \{ return \[mtMiddleware\(\)\]; \};/);
+  assert.match(read('README.md'), /flows and runs belong to the company chosen after signing in/);
 });
 
 test('with tenancy: levels registered on both sides, tables, picker first, membership checked', function () {
@@ -510,13 +524,13 @@ test('menu keys live in one place: App.jsx and Configure UI → Menu share ui/sr
   generate.generate(answers(), plain);
   var menu = fs.readFileSync(path.join(plain, 'ui/src/menu.js'), 'utf8');
   assert.match(menu, /export const FORM_MENU_PREFIX = 'form:'/);
-  assert.match(menu, /'Home',\n  'Tasks',\n  'Admin',\n  'Configure UI'/);
+  assert.match(menu, /'Home',\n  'Tasks',\n  'Flows',\n  'Admin',\n  'Configure UI'/);
   assert.match(fs.readFileSync(path.join(plain, 'ui/src/App.jsx'), 'utf8'), /import \{ FORM_MENU_PREFIX \} from '\.\/menu\.js'/);
   assert.match(fs.readFileSync(path.join(plain, 'ui/src/pages/MenuSettings.jsx'), 'utf8'), /APP_MENU_KEYS\.includes\(name\)/);
 
   var mt = path.join(tmpdir(), 'demo');
   generate.generate(answers({ tenancy: questions.tenancyLevels('company') }), mt);
-  assert.match(fs.readFileSync(path.join(mt, 'ui/src/menu.js'), 'utf8'), /'Tasks',\n  'Switch company',\n  'Admin'/);
+  assert.match(fs.readFileSync(path.join(mt, 'ui/src/menu.js'), 'utf8'), /'Tasks',\n  'Flows',\n  'Switch company',\n  'Admin'/);
 });
 
 test('a generated project reads like one: README at the root, in api and in ui', function () {

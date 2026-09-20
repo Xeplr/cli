@@ -1,0 +1,52 @@
+#!/usr/bin/env node
+
+// XEPLR WORKFLOW AS ITS OWN SERVICE — `npm run start-workflow`.
+//
+// Only when WORKFLOW_PORT is set (development.env / production.env). Blank, it
+// runs inside the API instead and this refuses to start, saying so.
+//
+// The SAME workflow as the embedded one (../workflow.js): this app's database,
+// this app's tenancy and membership gate, the same permission checks, and the
+// same path — /api/workflow/flows — so the browser cannot tell the two apart.
+// What routes /api/workflow here: ui/.env WORKFLOW_URL for Vite's dev proxy,
+// nginx in production (README, "Production").
+require('dotenv').config({ path: require('path').join(__dirname, '..', (process.env.NODE_ENV || 'development') + '.env') });
+
+if (!process.env.WORKFLOW_PORT) {
+  console.error('\n[workflow] WORKFLOW_PORT is blank — workflow runs INSIDE the API (npm run start-api).');
+  console.error('  To run it as its own service, set WORKFLOW_PORT in development.env,');
+  console.error('  and WORKFLOW_URL in ui/.env to http://localhost:<that port>.\n');
+  process.exit(1);
+}
+
+require('@xeplr/base-apis').checkEnv(require('../env.required.js'), { appName: 'workflow' });
+
+var express = require('express');
+var createApp = require('@xeplr/base-apis/express');
+
+async function start() {
+  // This app's tenancy levels, registered exactly as the API registers them.
+  await require('../db/setup');
+  var app = require('../app');
+  var flowsRouter = await require('../workflow')(app.memberGate);
+
+  var health = express.Router();
+  health.get('/', function(req, res) { res.json({ status: 'ok', service: 'workflow' }); });
+
+  createApp(process.env.WORKFLOW_PORT, '__NAME___workflow', {
+    // Every route needs a valid token, checked against the same sign-in
+    // service as the API — one login for both.
+    auth: { publicPaths: ['/health'] },
+    log: { logDir: process.env.LOG_DIR || './logs' },
+    middleware: app.middleware(),
+    routes: {
+      '/health': health,
+      '/api/workflow/flows': flowsRouter
+    }
+  });
+}
+
+start().catch(function(err) {
+  console.error('[workflow] startup failed:', err.stack || err.message);
+  process.exit(1);
+});

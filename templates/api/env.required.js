@@ -26,5 +26,4 @@ module.exports = [
   // error — the most expensive way for this to go wrong.
   'DB_API',
   '__PREFIX___CONNECTION',
-__WF_REQUIRED_ENV__
 ];

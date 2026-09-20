@@ -1,6 +1,6 @@
 // THE SAMPLE — a list of tasks. New and Edit open the task form on a PAGE of
-// its own, where it saves itself as you type; there is no Save button, and
-// Done goes back here. (A list can open its form in a popup instead: Configure
+// its own. Its Save button saves over AJAX (never a form submit) and comes
+// back here; Cancel comes back without saving. (A list can open its form in a popup instead: Configure
 // UI → Forms → the list → Opens in.)
 //
 // Nothing about tasks is written in this file. The list and the form are

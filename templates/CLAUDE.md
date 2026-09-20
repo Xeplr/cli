@@ -11,7 +11,7 @@ A new UI is a **form**: a list, and an add / edit form it opens — on a page of
 
 Create every file below — the hooks and the model run the defaults (`super`) until the request needs more.
 
-1. **The spec** — `api/screens/<form>/<form>.entity.json`: the name and the fields in reading order. Copy `api/screens/task/task.entity.json`; the format is "The entity spec" in AUTHORING.md. A dropdown on another form's table needs that form to exist first.
+1. **The spec** — `api/screens/<form>/<form>.entity.json`: the name and the fields in reading order. Copy `api/screens/task/task.entity.json`; the format is "The entity spec" in AUTHORING.md. A dropdown on another form's table needs that form to exist first. **Use the ready-made fields** for email, phone, website, LinkedIn, age, date of birth, gender, country, amount, percentage, yes/no and postal code — `"type": "email"` and so on ("Choosing controls" in AUTHORING.md): they bring the keyboard, format check and options with them, so don't write those by hand.
 2. **Screens + server files** — from `api/`:
    ```sh
    npx xeplr-factory screens screens/<form>/<form>.entity.json -o screens/<form> --no-pages
@@ -22,10 +22,10 @@ Create every file below — the hooks and the model run the defaults (`super`) u
 3. **Register them** in `api/screens/index.js`: both screens in `documents` (edit before list), `<form>_edit: require('./<form>/<form>.hooks')` in `hooks`, `require('./<form>/<form>.model')` in `models`.
 4. **The form's page, with the front-end hooks** — `ui/src/pages/Edit<Form>.jsx`: copy `EditTask.jsx`; rename `TaskHooks` → `<Form>Hooks`, `taskHooks` → `<form>Hooks`, `'task_edit'` → `'<form>_edit'`. Keep every method calling `super`.
 5. **The list's page** — `ui/src/pages/<Forms>.jsx`: copy `Tasks.jsx`; load `'<form>_list'`, import `<form>Hooks` from `./Edit<Form>.jsx`, drop `TasksHelp`.
-6. **Route and side-rail item** — `ui/src/App.jsx`: import the list page, add `<Route path="/<forms>" element={<Forms />} />` next to `/tasks`, and a `drawerItems` entry `{ key: '<Forms>', icon, clickHandler }` — by **key**, with an **icon** (a collapsed rail shows icons only). Never write the label in code.
+6. **Route and side-rail item** — `ui/src/App.jsx`: import the list page, add `<Route path="/<forms>" element={<Forms />} />` next to `/tasks`, and a `drawerItems` entry `{ key: '<Forms>', icon, path: '/<forms>', clickHandler }` — by **key**, with an **icon** (a collapsed rail shows icons only) and the **path** (so the rail marks it as the current page). Never write the label in code.
 7. **The menu row** — `api/migrations-auth/000N_<forms>_menu.sql` (next free number): copy `0002_tasks_menu.sql`, its `name` being the **key** spelled exactly as in `drawerItems` — an unknown key is dropped silently. Set `label` only if it should read differently; people can rename it later in Configure UI → Menu. Then, in `api/`: `npm run migrate:auth`, and restart the sign-in service.
 8. **Restart the API.** It publishes screens that were never published — creating the table — and logs `[api] published screens: <form>_edit, <form>_list`.
-9. **Check** — open the page, New, fill in the form; the popup says "All changes saved" and the row is in the table.
+9. **Check** — open the page, New, fill in the form and press **Save**; it goes back to the list and the row is in the table.
 
 Then change only what the request asks for:
 
@@ -47,7 +47,7 @@ Then change only what the request asks for:
 - **`file`** — the column holds the **path**, never the file. Say which extensions (`"accept": ".pdf,.docx"`) and how large (`"maxSize": 10`, in MB); the API enforces both, by extension, and keeps the file under `FACTORY_FILES_DIR`. Uploading needs `multer` in `api/` (already in package.json).
 - **`stepper`** — a journey across the top. Every other field says which step it is on (`"step": "Planning"`), and one without a `step` shows on every step. `step(ctx)` in the front-end hooks runs before each move: return `false` to stay, a step's key to go there, `ctx.disable(['planning'])` to rule steps out (struck through on the bar, passed over by Next and Back) and `ctx.enable()` to bring them back.
 
-**A list opens its form on a page or in a popup** — `"openIn": "page"` in the entity spec, or Configure UI → Forms → the list. A page needs `onOpenRecord` on the list's page (where to navigate) and `onDone` on the form's page (where Done goes back to): `Tasks.jsx` and `EditTask.jsx` show both, with routes `/tasks/new` and `/tasks/:id` in `App.jsx`.
+**A list opens its form on a page or in a popup** — `"openIn": "page"` in the entity spec, or Configure UI → Forms → the list. A page needs `onOpenRecord` on the list's page (where to navigate) and `onDone` on the form's page (where Save and Cancel go back to): `Tasks.jsx` and `EditTask.jsx` show both, with routes `/tasks/new` and `/tasks/:id` in `App.jsx`.
 
 __WF_CLAUDE__
 **Keys and labels.** A form's key names its screens and table and never changes once published; its label is the screens' name. A menu item's key (`menus.name`) is what `drawerItems` matches; its label is what the rail shows, renamed in Configure UI → Menu. Code only ever uses keys.

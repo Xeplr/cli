@@ -26,7 +26,7 @@ export class TaskHooks extends FactoryHooks {
     return super.get(ctx)
   }
 
-  /** Every autosave — keep it quick. Returns the saved record. */
+  /** The Save button — one AJAX call. Returns the saved record. */
   save(values, ctx) {
     return super.save(values, ctx)
   }
@@ -65,11 +65,11 @@ export const taskHooks = new TaskHooks()
 
 /**
  * The task form on a page of its own — /tasks/new, or /tasks/:id for a task
- * that exists. The list sends people here (its "Opens in" is a page), and
- * Done brings them back.
+ * that exists. The list sends people here (its "Opens in" is a page).
  *
- * There is no Save button: the form saves itself a moment after each change.
- * Done only waits for anything still in flight, then leaves.
+ * Nothing is written while typing. Save sends the task (one AJAX call, never
+ * a form submit) and comes back to the list; Cancel comes back without
+ * saving, asking first if anything is unsaved. Both go through onDone.
  */
 export default function EditTask({ record }) {
   const { id } = useParams()

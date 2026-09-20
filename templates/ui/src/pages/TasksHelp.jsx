@@ -47,7 +47,8 @@ export default function TasksHelp() {
       </p>
       <p>
         <strong>New</strong> and <strong>Edit</strong> open the form on a page
-        of its own, and <strong>Done</strong> comes back here. A list can open
+        of its own. Nothing is saved while you type: <strong>Save</strong> saves
+        and comes back here, <strong>Cancel</strong> comes back without saving. A list can open
         it in a popup instead — that is its <strong>Opens in</strong> setting.
       </p>
 

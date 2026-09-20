@@ -76,7 +76,21 @@ async function start() {
   var published = await factory.publishScreens(screens.documents);
   if (published.published.length) console.log('[api] published screens: ' + published.published.join(', '));
 
-  require('../app')();
+  // FLOWS — Xeplr Workflow, inside this API and in this app's own database
+  // (routes/flows.js says why). It creates its tables on first start, keeps its
+  // own migration record, and follows this app's tenancy instead of creating
+  // companies / workspaces of its own.
+  var buildApp = require('../app');
+  // WORKFLOW_PORT set: it runs as its own service (npm run start-workflow),
+  // and this API leaves it alone.
+  if (process.env.WORKFLOW_PORT) {
+    console.log('[api] flows: workflow runs on its own port ' + process.env.WORKFLOW_PORT + ' (npm run start-workflow)');
+    buildApp();
+    return;
+  }
+  require('../routes/flows').mount(await require('../workflow')(buildApp.memberGate));
+
+  buildApp();
 }
 
 start().catch(function(err) {

@@ -41,9 +41,12 @@ Already working, with nothing to wire up:
   - **Menu**: rename, reorder and hide the side rail's items.
 
   Nobody else sees it, and the API refuses everyone else.
-- **Flows, if you run Xeplr Workflow** — your forms one after another, where
-  what someone fills in decides the next screen. Designed in Configure UI →
-  Flows, walked at `/journey/<key>`, and resumable, since Workflow keeps the run.
+- **Flows, in every app** — your forms one after another, where what someone
+  fills in decides the next screen. Designed in Configure UI → Flows, walked at
+  `/journey/<key>`, and resumable. Run by `@xeplr/workflow` **inside the API**,
+  in the app's own database — nothing extra to start, no port, no setting. It
+  follows the app's tenancy (none, or the levels you chose) and never creates
+  companies or workspaces of its own.
 - **Multi-tenancy, if you ask for it** — companies (or companies and
   workspaces, up to four levels). Every row is stamped with the one it was made
   in, every read sees only its rows, membership is checked on every request,
@@ -198,16 +201,17 @@ no defaults, ever.
 | Super admin email | the account you sign in with |
 | Super admin password | its password |
 | Multi-tenant? | no — or the levels, outermost first: `company`, `company, workspace` |
-| Flows — is Xeplr Workflow running? | no — or its address (`http://localhost:19122`) and its backend folder. Yes adds **Configure UI → Flows**, a `/journey/<key>` page, and `/api/flows` forwarded to Workflow — and sets multi-tenancy to Workflow's own levels, company then workspace, since it keeps every journey inside both |
 | Database connection | host, port, user, password — or skip, and fill it in later |
 
 Encryption keys and signing secrets are **generated, never asked**.
 
-**Flows need Workflow to share the app's sign-in.** Workflow is a separate
-service, not a package the project installs: set its `AUTH_URL` and
-`AUTH_DB_NAME` to the new app's, and the app's sign-in service loads Workflow's
-access rules from the folder you gave. The generated README says exactly which
-values.
+**Flows, inside the API.** `@xeplr/workflow` is a dependency of `api/`, and
+`bin/www` starts it with `registerWorkflow` after the screens — in the app's
+own database (`DB_API`, its own migration record `workflow_migrations`), with
+`tenantTables: false` so it follows the app's tenancy rather than creating
+`companies` / `workspaces`, and `access: true` so each flows route checks the
+caller's permissions, which its `migrations-auth` grants (loaded through
+`XEPLR_AUTH_MIGRATIONS`).
 
 ## Licence
 

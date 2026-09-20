@@ -24,5 +24,6 @@ npm run build     # → dist/
 ## Rules
 
 - `authFetch` returns the **parsed body**, not a Response — no `.json()`.
-- A side-rail item needs an **icon** (a collapsed rail shows icons only) and its key must exist as a menu row, or it is dropped silently.
+- A side-rail item needs an **icon** (a collapsed rail shows icons only) and its key must exist as a menu row, or it is dropped silently. Give it its **`path`** too: that is how the rail marks the page you are on.
+- The rail is 48px when collapsed; `--app-rail-width` in `src/index.css` reserves the same space and must match it.
 - Set page backgrounds on a container inside the theme, never on `body`.

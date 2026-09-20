@@ -35,7 +35,13 @@ export default defineConfig(({ mode }) => {
     // Only the real network calls (/auth/api/*), NOT bare /auth — that prefix
     // is also used by client-side routes (/auth/login, /auth/profile), which
     // must fall through to Vite's SPA index.html rather than the auth backend.
-    '/auth/api': authUrl
+    '/auth/api': authUrl,
+    // A SERVICE THAT MAY RUN ON ITS OWN PORT, before the /api it sits under —
+    // the first matching prefix wins. Blank WORKFLOW_URL: it runs inside the
+    // API, so the API answers. The browser always calls /api/workflow/…; which
+    // process serves it is decided here (and by nginx in production), never in
+    // the UI's code.
+    '/api/workflow': env.WORKFLOW_URL || apiUrl
   }
   API_PATHS.forEach((p) => { proxy[p] = apiUrl })
 

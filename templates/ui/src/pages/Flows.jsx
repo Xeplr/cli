@@ -4,6 +4,9 @@
 // which comes next. It is run by Xeplr Workflow, so a journey can be left and
 // picked up later — by someone else, on another day. Design it here; open it
 // at /journey/<key>.
+//
+// Run by @xeplr/workflow inside this app's own API and database — nothing to
+// connect.
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { flows } from '../api/flows.js'
@@ -11,10 +14,15 @@ import { flows } from '../api/flows.js'
 export default function Flows() {
   const [list, setList] = useState(null)
   const [error, setError] = useState(null)
+  const [offline, setOffline] = useState(null)   // API_NOT_RESTARTED
   const [name, setName] = useState('')
   const navigate = useNavigate()
 
-  const load = () => flows.listFlows().then(setList, (e) => setError(e.message))
+  const load = () => flows.listFlows().then(setList, (e) => {
+    const off = flowsOffline(e)
+    if (off) setOffline(off)
+    else setError(e.message)
+  })
   useEffect(() => { load() }, [])
 
   const create = async (e) => {
@@ -29,6 +37,8 @@ export default function Flows() {
       setError(err.message)
     }
   }
+
+  if (offline) return <NotConnected offline={offline} />
 
   return (
     <div className="app-forms">
@@ -66,6 +76,28 @@ export default function Flows() {
           </tbody>
         </table>
       )}
+    </div>
+  )
+}
+
+/**
+ * Why flows cannot run right now, or null when the error is something else.
+ * Workflow runs inside this app's API, so there is one such case left: an API
+ * started before flows existed (404 on /api/flows) — restart it.
+ */
+export function flowsOffline(err) {
+  if (err && err.status === 404) return { code: 'API_NOT_RESTARTED', message: 'This app\'s API does not have the flows route yet.' }
+  return null
+}
+
+/** Flows before the API has been restarted with them. */
+export function NotConnected({ offline }) {
+  return (
+    <div className="app-forms">
+      <div className="app-connect">
+        <h2>Restart the API to use flows</h2>
+        <p>{offline.message} It was started before flows were added — restart it, then reload this page.</p>
+      </div>
     </div>
   )
 }

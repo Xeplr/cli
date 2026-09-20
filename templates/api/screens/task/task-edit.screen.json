@@ -77,7 +77,7 @@
       "z": 4,
       "props": {
         "label": "Status",
-        "placeholder": "Select…",
+        "placeholder": "Select\u2026",
         "data": {
           "source": "static",
           "options": [
@@ -109,7 +109,7 @@
       "x": 0.5125,
       "y": 0.4,
       "w": 0.4475,
-      "h": 0.065,
+      "h": 0.08,
       "z": 5,
       "props": {
         "label": "Priority",

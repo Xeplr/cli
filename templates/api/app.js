@@ -12,7 +12,13 @@ var memberGate = __MT_MEMBER_GATE__;
 // default could only ever fire in a process that skipped that check.
 var port = process.env.__PREFIX___PORT;
 
-module.exports = function buildApp(extraRoutes) {
+module.exports = buildApp;
+// bin/www and bin/workflow hand the same gate to the flows router they start,
+// and bin/workflow runs the same request middleware (tenancy) as this app.
+module.exports.memberGate = memberGate;
+module.exports.middleware = function() { return __MT_MIDDLEWARE_LIST__; };
+
+function buildApp(extraRoutes) {
   return createApp(port, '__NAME___api', {
     // Every route needs a valid token, checked against the auth service at
     // AUTH_URL. This app names no `middleware` of its own — it takes the
@@ -48,4 +54,4 @@ __MT_APP_ROUTES__
       })
     })
   });
-};
+}
