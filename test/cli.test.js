@@ -351,12 +351,52 @@ test('every app has flows, run by @xeplr/workflow inside the API, in the app dat
   var www = read('api/bin/www');
   assert.match(www, /if \(process\.env\.WORKFLOW_PORT\) \{/, 'with a port, the API leaves it to its own process');
   assert.match(www, /require\('\.\.\/routes\/flows'\)\.mount\(await require\('\.\.\/workflow'\)\(buildApp\.memberGate\)\)/);
-  assert.match(read('api/bin/workflow'), /'\/api\/workflow\/flows': flowsRouter/);
+  // The WHOLE router, not just the flows facade: /flows for the journey,
+  // /workflows for the designer's document API, /actions for its palette.
+  assert.match(read('api/bin/workflow'), /'\/api\/workflow': workflowRouter/);
   assert.match(read('api/bin/workflow'), /WORKFLOW_PORT is blank/);
   assert.ok(fs.statSync(path.join(dir, 'api/bin/workflow')).mode & 0o111 || true);
   assert.match(read('api/package.json'), /"start-workflow": "node \.\/bin\/workflow"/);
-  assert.match(read('api/routes/index.js'), /router\.use\('\/api\/workflow\/flows', require\('\.\/flows'\)\)/);
+  assert.match(read('api/routes/index.js'), /router\.use\('\/api\/workflow', require\('\.\/flows'\)\)/);
   assert.match(read('ui/src/api/flows.js'), /base: '\/api\/workflow'/);
+
+  // ONE DESIGNER for the whole product: @xeplr/ui-workflow's canvas, dropped
+  // onto this app's own page. Not a second, screens-only builder.
+  var designer = read('ui/src/pages/FlowDesigner.jsx');
+  assert.match(designer, /import \{ WorkflowDesigner \} from '@xeplr\/ui-workflow'/);
+  assert.match(designer, /apiBase="\/api\/workflow"/);
+  // The factory's screens-only builder is not imported — it may still be
+  // NAMED, in the comment saying why it is gone.
+  assert.doesNotMatch(designer, /import[^\n]*FlowBuilder/, 'the factory builder is not a second designer');
+  assert.match(read('ui/package.json'), /"@xeplr\/ui-workflow": "\^1\.1\.0"/);
+
+  // THIS APP'S FORMS ARE THE FLOW'S SCREENS, and the wiring for that is a
+  // PACKAGE, not lines in a generated app. Both props come from one hook:
+  // @xeplr/ui-factory answers which screens exist (with their fields, so a
+  // later step can pick `title` by name) and how to design one without
+  // leaving the flow.
+  assert.match(designer, /useScreenSource\(factory/);
+  assert.match(designer, /screens=\{screens\}/);
+  assert.match(designer, /screenEditor=\{screenEditor\}/);
+
+  // The generated app must not carry a hand-rolled version of any of it. An
+  // app is generated once and then lives its own life: glue copied into it
+  // can never be fixed centrally, so a control type added to the factory
+  // would never reach an app made last month. If this fails, the thing it is
+  // testing belongs in a package.
+  var uiPages = result.written.filter(function (f) { return /^ui\/src\/pages\//.test(f); });
+  assert.ok(uiPages.indexOf('ui/src/pages/ScreenEditor.jsx') === -1, 'the screen editor is not copied into the app');
+  assert.doesNotMatch(designer, /inputNodes|loadScreen\(|listScreens\(/, 'the app does not derive screen fields itself');
+  assert.doesNotMatch(designer, /FactoryBuilder[\s\S]*onPublish/, 'the app does not wire a builder of its own');
+
+  // A FLOW IS AN ORDINARY WORKFLOW addressed by a key, so every kind of step
+  // is available in it — a Screen for what a person fills in, an Action for
+  // what happens next. Created as kind 'screens' it would be generated from a
+  // design held elsewhere, and the designer would refuse to edit its own flows.
+  assert.match(designer, /workflowKey=/);
+  var flowsPage = read('ui/src/pages/Flows.jsx');
+  assert.match(flowsPage, /saveWorkflow\(\{[^}]*kind: 'workflow'/);
+  assert.doesNotMatch(flowsPage, /createFlow\(/, 'a new flow is not a screens-kind flow');
 
   // Ports and addresses are SETTINGS: blank = inside the API.
   var env = read('api/development.env');

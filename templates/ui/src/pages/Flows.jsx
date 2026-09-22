@@ -1,15 +1,29 @@
 // CONFIGURE UI → FLOWS — every journey across the app's forms.
 //
-// A flow is screens one after another: what someone fills in on one decides
-// which comes next. It is run by Xeplr Workflow, so a journey can be left and
-// picked up later — by someone else, on another day. Design it here; open it
-// at /journey/<key>.
+// A flow is what someone is walked through: screens one after another, and
+// whatever has to happen between them. What they fill in on one decides which
+// comes next. Xeplr Workflow runs it, so a journey can be left and picked up
+// later — by someone else, on another day. Design it here; open it at
+// /journey/<key>.
 //
-// Run by @xeplr/workflow inside this app's own API and database — nothing to
-// connect.
+// A FLOW IS AN ORDINARY WORKFLOW, addressed by a key this page makes from its
+// name. It used to be created as kind 'screens', which is a workflow whose
+// steps are GENERATED from a design held in another app — and that app was
+// the screens-only builder this one replaced. The designer then had to refuse
+// to edit its own flows ("designed in Configure UI"), which is how a flow
+// became a page you could open and not change.
+//
+// So a flow is a workflow now, and every kind of step is available inside it:
+// a Screen for the part a person fills in, an Action for the email that goes
+// out after it, a Condition for where it goes next. Flows created the old way
+// still appear here and still run; the designer shows them read-only.
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { flows } from '../api/flows.js'
+import { listWorkflows, saveWorkflow, configureWorkflowApi } from '@xeplr/ui-workflow'
+
+// The same mount the designer uses. Said here as well because this page can
+// be the first one to ask, and a base set after the first request is too late.
+configureWorkflowApi('/api/workflow')
 
 export default function Flows() {
   const [list, setList] = useState(null)
@@ -18,7 +32,7 @@ export default function Flows() {
   const [name, setName] = useState('')
   const navigate = useNavigate()
 
-  const load = () => flows.listFlows().then(setList, (e) => {
+  const load = () => listWorkflows().then(setList, (e) => {
     const off = flowsOffline(e)
     if (off) setOffline(off)
     else setError(e.message)
@@ -31,7 +45,9 @@ export default function Flows() {
     if (!label) return
     const key = label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
     try {
-      await flows.createFlow({ key, name: label })
+      // No steps: the designer is where those come from, and it opens on the
+      // flow this creates. `key` is what every link to it uses from here on.
+      await saveWorkflow({ name: label, key, kind: 'workflow', status: 'draft' })
       navigate(`/configure/flows/${key}`)
     } catch (err) {
       setError(err.message)
@@ -62,14 +78,20 @@ export default function Flows() {
           <thead><tr><th>Flow</th><th>Key</th><th>Status</th><th>Screens</th><th /></tr></thead>
           <tbody>
             {list.map((f) => (
-              <tr key={f.key}>
+              <tr key={f.id || f.key}>
                 <td><strong>{f.name}</strong></td>
-                <td className="app-sub">{f.key}</td>
-                <td>{f.status}</td>
+                <td className="app-sub">{f.key || '—'}</td>
+                <td>{f.kind === 'screens' ? f.status + ' · read-only' : f.status}</td>
                 <td>{typeof f.steps === 'number' ? f.steps : (f.steps || []).length}</td>
                 <td className="app-row-actions">
-                  <Link to={`/configure/flows/${f.key}`}>Design</Link>
-                  {f.status === 'published' && <Link to={`/journey/${f.key}`}>Open</Link>}
+                  {f.key && <Link to={`/configure/flows/${f.key}`}>Design</Link>}
+                  {/* PUBLISHING IS A SCREENS-FLOW IDEA: there, publish is what
+                      checks the design before somebody is walked through it.
+                      A flow drawn in the designer has no such step, so it can
+                      be opened as soon as it has one. */}
+                  {(f.kind === 'screens' ? f.status === 'published' : (f.steps || []).length > 0) && f.key && (
+                    <Link to={`/journey/${f.key}`}>Open</Link>
+                  )}
                 </td>
               </tr>
             ))}
