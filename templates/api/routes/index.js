@@ -34,9 +34,9 @@ router.get('/whoami', function(req, res) {
 //   var { genericRoute } = require('@xeplr/base-apis');
 //   router.use('/api/things', genericRoute({ key: 'thing', model: require('../models').Thing }));
 
-// Flows: Xeplr Workflow, at /api/workflow/flows — inside this API, or on its
+// Flows: Xeplr Workflow, at /api/workflow — inside this API, or on its
 // own port with WORKFLOW_PORT (see routes/flows.js). The path is the same
 // either way: the browser never knows which.
-router.use('/api/workflow/flows', require('./flows'));
+router.use('/api/workflow', require('./flows'));
 
 module.exports = router;

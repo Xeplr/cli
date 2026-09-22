@@ -20,24 +20,28 @@
 //                    "Start flow run"…), granted by @xeplr/workflow's
 //                    migrations-auth — in XEPLR_AUTH_MIGRATIONS.
 //
-// Mounted by routes/index.js at /api/workflow/flows, behind this app's auth gate.
+// Mounted by routes/index.js at /api/workflow, behind this app's auth gate.
+// Everything Workflow serves lives under it:
+//   /api/workflow/flows       the flows people walk through (Journey)
+//   /api/workflow/workflows   the designer's document API
+//   /api/workflow/actions     what a step can DO, for the palette
 var express = require('express');
 
 var router = express.Router();
-var flows = null;
+var workflow = null;
 
 router.use(function(req, res, next) {
   if (process.env.WORKFLOW_PORT) {
     return res.status(404).json({ message: 'Workflow runs on its own port (WORKFLOW_PORT) — route /api/workflow there (ui/.env WORKFLOW_URL, or nginx)' });
   }
   // Only before startup has finished — bin/www mounts it before listening.
-  if (!flows) return res.status(503).json({ message: 'Flows are still starting' });
-  return flows(req, res, next);
+  if (!workflow) return res.status(503).json({ message: 'Flows are still starting' });
+  return workflow(req, res, next);
 });
 
-/** bin/www hands over registerWorkflow's flowsRouter, already gated. */
-router.mount = function(flowsRouter) {
-  flows = flowsRouter;
+/** bin/www hands over registerWorkflow's router, already gated. */
+router.mount = function(workflowRouter) {
+  workflow = workflowRouter;
 };
 
 module.exports = router;

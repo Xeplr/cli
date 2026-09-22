@@ -9,7 +9,14 @@
 // @xeplr/workflow's migrations-auth, which XEPLR_AUTH_MIGRATIONS loads.
 var { registerWorkflow } = require('@xeplr/workflow');
 
-/** Runs workflow's migrations, and returns its flows router — already gated. */
+/**
+ * Runs workflow's migrations and returns its ROUTER — already gated.
+ *
+ * The whole router, not just the flows facade: it carries `/flows` (the
+ * screens a person walks through) AND `/workflows` (the designer's own
+ * document API). One designer serves both — @xeplr/ui-workflow's canvas, the
+ * same one every xeplr product uses — so the app has to serve what it reads.
+ */
 module.exports = async function startWorkflow(memberGate) {
   var workflow = await registerWorkflow({
     applicationId: '__NAME__',
@@ -23,5 +30,5 @@ module.exports = async function startWorkflow(memberGate) {
     access: true,
     mtMembershipGate: memberGate
   });
-  return workflow.flowsRouter;
+  return workflow.router;
 };

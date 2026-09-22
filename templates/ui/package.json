@@ -16,7 +16,9 @@
     "@xeplr/ui-table": "^1.0.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-router-dom": "^7.13.2"
+    "react-router-dom": "^7.13.2",
+    "@xeplr/ui-workflow": "^1.1.0",
+    "@xeplr/ui-utils": "^1.0.2"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.2.0",

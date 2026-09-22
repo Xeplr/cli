@@ -7,7 +7,7 @@
 //
 // The SAME workflow as the embedded one (../workflow.js): this app's database,
 // this app's tenancy and membership gate, the same permission checks, and the
-// same path — /api/workflow/flows — so the browser cannot tell the two apart.
+// same path — /api/workflow — so the browser cannot tell the two apart.
 // What routes /api/workflow here: ui/.env WORKFLOW_URL for Vite's dev proxy,
 // nginx in production (README, "Production").
 require('dotenv').config({ path: require('path').join(__dirname, '..', (process.env.NODE_ENV || 'development') + '.env') });
@@ -28,7 +28,7 @@ async function start() {
   // This app's tenancy levels, registered exactly as the API registers them.
   await require('../db/setup');
   var app = require('../app');
-  var flowsRouter = await require('../workflow')(app.memberGate);
+  var workflowRouter = await require('../workflow')(app.memberGate);
 
   var health = express.Router();
   health.get('/', function(req, res) { res.json({ status: 'ok', service: 'workflow' }); });
@@ -41,7 +41,7 @@ async function start() {
     middleware: app.middleware(),
     routes: {
       '/health': health,
-      '/api/workflow/flows': flowsRouter
+      '/api/workflow': workflowRouter
     }
   });
 }
