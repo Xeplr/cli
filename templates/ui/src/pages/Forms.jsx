@@ -9,7 +9,7 @@
 // Claude can make forms too — see "Create a new UI" in CLAUDE.md.
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { listMenuItems, addMenuItem, removeMenuItem, useAccess } from '@xeplr/ui-account'
+import { listMenuItems, addMenuItem, removeMenuItem, useAccess, getUsers } from '@xeplr/ui-account'
 import { deleteForm } from '@xeplr/ui-factory'
 // THE APP'S OWN DIALOGS. window.confirm cannot say which button is the
 // dangerous one and looks like a different piece of software appearing over
@@ -19,21 +19,44 @@ import { raiseConfirm, raiseSnackbar } from '@xeplr/ui-utils'
 import { factory } from '../api/factory.js'
 import { FORM_MENU_PREFIX } from '../menu.js'
 
-/** listScreens rows → one entry per form: { key, name, source, list, edit }. */
+/**
+ * listScreens rows → one entry per form.
+ *
+ * `description` and `createdBy` travel with it because of the thing that
+ * happens once more than a handful of people can make forms: three of them
+ * are called "Inspection", and the fields say what each HOLDS, never what it
+ * was for or whose it is. Deciding which to keep is otherwise guesswork.
+ */
 function groupForms(rows) {
   const byKey = new Map()
   rows.forEach((row) => {
     const m = /^(.*)_(list|edit)$/.exec(row.screenKey)
     const key = m ? m[1] : row.screenKey
-    const entry = byKey.get(key) || { key, name: null, source: null, list: null, edit: null }
+    const entry = byKey.get(key) || {
+      key, name: null, source: null, list: null, edit: null,
+      description: null, createdBy: null, createdDate: null
+    }
     if (m) entry[m[2]] = row
     else entry.edit = row
     if (m && m[2] === 'list') entry.name = row.name
     entry.name = entry.name || row.name
     entry.source = entry.source || row.source
+    entry.description = entry.description || row.description
+    // The form's own half is the one that speaks for it; a list screen is
+    // only consulted when there is no other answer.
+    if (m && m[2] === 'edit') { entry.createdBy = row.createdBy; entry.createdDate = row.createdDate }
+    entry.createdBy = entry.createdBy || row.createdBy
+    entry.createdDate = entry.createdDate || row.createdDate
     byKey.set(key, entry)
   })
   return [...byKey.values()].sort((a, b) => String(a.name).localeCompare(String(b.name)))
+}
+
+/** "3 Feb 2026" — enough to tell two forms apart, no more. */
+function madeOn(when) {
+  if (!when) return null
+  const d = new Date(when)
+  return isNaN(d) ? null : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 function state(screen) {
@@ -56,6 +79,11 @@ export default function Forms() {
   const navigate = useNavigate()
   const { refreshAccess } = useAccess()
   const [forms, setForms] = useState(null)
+  // WHO MADE EACH ONE. The screens table keeps the maker's id; the names live
+  // in the sign-in service, so they are fetched once here and matched up.
+  // Failing to get them is not an error worth showing — the date alone still
+  // tells two forms of the same name apart.
+  const [people, setPeople] = useState({})
   const [inMenu, setInMenu] = useState(new Set())
   const [label, setLabel] = useState('')
   const [key, setKey] = useState('')
@@ -70,6 +98,21 @@ export default function Forms() {
     )
   }, [])
   useEffect(load, [load])
+
+  // Once. A name per row would be one request per form, and these change far
+  // more slowly than the page is opened.
+  useEffect(() => {
+    let cancelled = false
+    getUsers()
+      .then((rows) => {
+        if (cancelled) return
+        const by = {}
+        ;(rows || []).forEach((u) => { by[u.id] = u.name || u.email || u.id })
+        setPeople(by)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
 
   const onLabel = (value) => {
     setLabel(value)
@@ -194,7 +237,19 @@ export default function Forms() {
               const canOpen = form.list && form.list.version !== null
               return (
                 <tr key={form.key}>
-                  <td><strong>{form.name || form.key}</strong><div className="app-sub">{form.key}</div></td>
+                  <td>
+                    <strong>{form.name || form.key}</strong>
+                    <div className="app-sub">{form.key}</div>
+                    {/* WHAT IT IS FOR, and whose it is — the two things that
+                        tell three forms of the same name apart. The date
+                        stands alone when the names cannot be fetched. */}
+                    {form.description && <div className="app-sub">{form.description}</div>}
+                    {(form.createdBy || form.createdDate) && (
+                      <div className="app-sub">
+                        {[people[form.createdBy], madeOn(form.createdDate)].filter(Boolean).join(' · ')}
+                      </div>
+                    )}
+                  </td>
                   <td><code>{form.source || '—'}</code></td>
                   <td className={edit.unpublished ? 'app-forms-pending' : undefined}>{edit.label}</td>
                   <td className={list.unpublished ? 'app-forms-pending' : undefined}>{list.label}</td>
