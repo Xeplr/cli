@@ -392,6 +392,17 @@ test('every app has flows, run by @xeplr/workflow inside the API, in the app dat
   // can never be fixed centrally, so a control type added to the factory
   // would never reach an app made last month. If this fails, the thing it is
   // testing belongs in a package.
+  // MASTERS — the lists the rest of the app points at, gathered in the admin
+  // section. Which forms are masters is the package's answer, not the app's:
+  // grouping two screens into a form and reading the flag is identical
+  // everywhere, so the page reads `masters` and does no grouping itself.
+  assert.ok(result.written.indexOf('ui/src/pages/Masters.jsx') !== -1, 'the masters page is written');
+  var mastersPage = read('ui/src/pages/Masters.jsx');
+  assert.match(mastersPage, /useScreenSource\(factory/);
+  assert.match(mastersPage, /\bmasters\b/);
+  assert.doesNotMatch(mastersPage, /_edit|_list/, 'the app does not group screens into forms itself');
+  assert.match(read('ui/src/pages/ConfigureUI.jsx'), /id: 'masters'/);
+
   var uiPages = result.written.filter(function (f) { return /^ui\/src\/pages\//.test(f); });
   assert.ok(uiPages.indexOf('ui/src/pages/ScreenEditor.jsx') === -1, 'the screen editor is not copied into the app');
   assert.doesNotMatch(designer, /inputNodes|loadScreen\(|listScreens\(/, 'the app does not derive screen fields itself');

@@ -2,6 +2,9 @@
 //
 //   Forms  every UI in the app: make one, design it, publish it, open it, add it
 //          to the side rail
+//   Masters the lists the rest of the app points at — departments, statuses,
+//          countries. Ordinary forms with a flag, gathered in one place because
+//          that is what they are: reference data, not daily work
 //   Menu   the side rail's items: rename, reorder, hide
 //   Flows  forms one after another — what is filled in decides the next; run by
 //          Xeplr Workflow, and says how to connect it until it is
@@ -10,11 +13,13 @@
 // people use.
 import { useSearchParams } from 'react-router-dom'
 import Forms from './Forms.jsx'
+import Masters from './Masters.jsx'
 import MenuSettings from './MenuSettings.jsx'
 import Flows from './Flows.jsx'
 
 const TABS = [
   { id: 'forms', label: 'Forms', Page: Forms },
+  { id: 'masters', label: 'Masters', Page: Masters },
   { id: 'flows', label: 'Flows', Page: Flows },
   { id: 'menu', label: 'Menu', Page: MenuSettings }
 ]
