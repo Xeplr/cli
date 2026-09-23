@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { listMenuItems, addMenuItem, removeMenuItem, useAccess } from '@xeplr/ui-account'
+import { deleteForm } from '@xeplr/ui-factory'
 import { factory } from '../api/factory.js'
 import { FORM_MENU_PREFIX } from '../menu.js'
 
@@ -85,6 +86,39 @@ export default function Forms() {
   }
 
   // The form first — publishing it creates or changes the table — then the list.
+  /**
+   * Delete a form. Asked first, in the words of what will actually happen
+   * rather than "are you sure": the design goes, and the records do not
+   * unless there are none.
+   */
+  const remove = async (form) => {
+    const ok = window.confirm(
+      'Delete "' + (form.name || form.key) + '"?\n\n' +
+      'Its design goes. Its table and any records in it are kept unless the table is empty.'
+    )
+    if (!ok) return
+    setBusy(form.key)
+    try {
+      const out = await deleteForm(factory, form)
+      setError(null)
+      // Said plainly: somebody deleting a form expects all of it to go, and a
+      // table left behind is worth knowing about rather than discovering.
+      if (out && out.records > 0) {
+        setNotice('"' + (form.name || form.key) + '" is gone. Its table "' + out.table + '" was kept — it still holds ' +
+          out.records + ' record' + (out.records === 1 ? '' : 's') + '.')
+      } else if (out && out.tableDropped) {
+        setNotice('"' + (form.name || form.key) + '" and its empty table are gone.')
+      } else {
+        setNotice('"' + (form.name || form.key) + '" is gone.')
+      }
+      load()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy(null)
+    }
+  }
+
   const publish = async (form) => {
     setBusy(form.key)
     setNotice(null)
@@ -173,6 +207,17 @@ export default function Forms() {
                         {busy === form.key ? 'Publishing…' : 'Publish'}
                       </button>
                     )}
+                    {/* The design always goes; the TABLE only when it is empty
+                        and nothing else describes it. Records are never lost
+                        to a click — @xeplr/factory refuses to drop a table
+                        with rows in it and says how many kept it. */}
+                    <button
+                      className="app-btn app-btn-quiet app-btn-danger"
+                      disabled={busy === form.key}
+                      onClick={() => remove(form)}
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               )
