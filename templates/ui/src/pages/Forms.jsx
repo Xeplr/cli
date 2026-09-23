@@ -11,6 +11,11 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { listMenuItems, addMenuItem, removeMenuItem, useAccess } from '@xeplr/ui-account'
 import { deleteForm } from '@xeplr/ui-factory'
+// THE APP'S OWN DIALOGS. window.confirm cannot say which button is the
+// dangerous one and looks like a different piece of software appearing over
+// this one; a red box pinned to the page stays there until something else
+// replaces it, long after it has been read.
+import { raiseConfirm, raiseSnackbar } from '@xeplr/ui-utils'
 import { factory } from '../api/factory.js'
 import { FORM_MENU_PREFIX } from '../menu.js'
 
@@ -52,15 +57,13 @@ export default function Forms() {
   const { refreshAccess } = useAccess()
   const [forms, setForms] = useState(null)
   const [inMenu, setInMenu] = useState(new Set())
-  const [error, setError] = useState(null)
-  const [notice, setNotice] = useState(null)
   const [label, setLabel] = useState('')
   const [key, setKey] = useState('')
   const [keyEdited, setKeyEdited] = useState(false)
   const [busy, setBusy] = useState(null)
 
   const load = useCallback(() => {
-    factory.listScreens().then((rows) => { setForms(groupForms(rows)); setError(null) }, (e) => setError(e.message))
+    factory.listScreens().then((rows) => setForms(groupForms(rows)), (e) => raiseSnackbar(e.message, { design: 'error' }))
     listMenuItems().then(
       (items) => setInMenu(new Set(items.filter((m) => m.name.startsWith(FORM_MENU_PREFIX) && !m.isHidden).map((m) => m.name.slice(FORM_MENU_PREFIX.length)))),
       () => {}
@@ -80,7 +83,7 @@ export default function Forms() {
       const made = await factory.createEntity({ key: key.trim(), label: label.trim() })
       navigate('/configure/forms/' + made.key + '/design/form')
     } catch (err) {
-      setError(err.message)
+      raiseSnackbar(err.message, { design: 'error' })
       setBusy(null)
     }
   }
@@ -92,28 +95,32 @@ export default function Forms() {
    * unless there are none.
    */
   const remove = async (form) => {
-    const ok = window.confirm(
-      'Delete "' + (form.name || form.key) + '"?\n\n' +
-      'Its design goes. Its table and any records in it are kept unless the table is empty.'
+    const ok = await raiseConfirm(
+      'Its design goes. Its table and any records in it are kept unless the table is empty.',
+      {
+        title: 'Delete "' + (form.name || form.key) + '"?',
+        confirmLabel: 'Delete',
+        // Red, because it cannot be undone from here.
+        danger: true
+      }
     )
     if (!ok) return
     setBusy(form.key)
     try {
       const out = await deleteForm(factory, form)
-      setError(null)
       // Said plainly: somebody deleting a form expects all of it to go, and a
       // table left behind is worth knowing about rather than discovering.
       if (out && out.records > 0) {
-        setNotice('"' + (form.name || form.key) + '" is gone. Its table "' + out.table + '" was kept — it still holds ' +
-          out.records + ' record' + (out.records === 1 ? '' : 's') + '.')
+        raiseSnackbar('"' + (form.name || form.key) + '" is gone. Its table "' + out.table + '" was kept — it still holds ' +
+          out.records + ' record' + (out.records === 1 ? '' : 's') + '.', { design: 'info' })
       } else if (out && out.tableDropped) {
-        setNotice('"' + (form.name || form.key) + '" and its empty table are gone.')
+        raiseSnackbar('"' + (form.name || form.key) + '" and its empty table are gone.', { design: 'success' })
       } else {
-        setNotice('"' + (form.name || form.key) + '" is gone.')
+        raiseSnackbar('"' + (form.name || form.key) + '" is gone.', { design: 'success' })
       }
       load()
     } catch (err) {
-      setError(err.message)
+      raiseSnackbar(err.message, { design: 'error' })
     } finally {
       setBusy(null)
     }
@@ -121,20 +128,18 @@ export default function Forms() {
 
   const publish = async (form) => {
     setBusy(form.key)
-    setNotice(null)
     try {
       for (const screen of [form.edit, form.list]) {
         if (!screen || (screen.version !== null && !screen.hasDraft)) continue
         const row = await factory.loadDraft(screen.screenKey)
         await factory.publish(row.document)
       }
-      setNotice('Published "' + form.name + '"')
-      setError(null)
+      raiseSnackbar('Published "' + form.name + '"', { design: 'success' })
       load()
     } catch (err) {
-      setError(err.confirm
+      raiseSnackbar(err.confirm
         ? 'Publishing "' + form.name + '" would remove columns and their data — open Design form and publish there to see what, and confirm.'
-        : err.message)
+        : err.message, { design: 'error' })
     } finally {
       setBusy(null)
     }
@@ -146,10 +151,10 @@ export default function Forms() {
       if (inMenu.has(form.key)) await removeMenuItem(FORM_MENU_PREFIX + form.key)
       else await addMenuItem({ name: FORM_MENU_PREFIX + form.key, label: form.name })
       await refreshAccess()
-      setNotice(inMenu.has(form.key) ? 'Removed "' + form.name + '" from the menu' : 'Added "' + form.name + '" to the menu — rename or move it in the Menu tab')
+      raiseSnackbar(inMenu.has(form.key) ? 'Removed "' + form.name + '" from the menu' : 'Added "' + form.name + '" to the menu — rename or move it in the Menu tab', { design: 'success' })
       load()
     } catch (err) {
-      setError(err.message)
+      raiseSnackbar(err.message, { design: 'error' })
     } finally {
       setBusy(null)
     }
@@ -175,8 +180,6 @@ export default function Forms() {
         </button>
       </form>
 
-      {error && <div className="app-error">{error}</div>}
-      {notice && <div className="app-notice">{notice}</div>}
 
       {forms && forms.length === 0 && <p className="app-sub">No forms yet.</p>}
       {forms && forms.length > 0 && (
