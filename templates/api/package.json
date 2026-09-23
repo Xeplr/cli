@@ -21,10 +21,10 @@
     "@xeplr/auth": "^1.1.4",
     "@xeplr/base-apis": "^2.0.0",
     "@xeplr/db": "^1.0.6",
-    "@xeplr/factory": "^1.0.6",
-    "@xeplr/ui-factory": "^1.0.14",
+    "@xeplr/factory": "^1.1.0",
+    "@xeplr/ui-factory": "^1.1.0",
     "@xeplr/utils": "^1.0.11",
-    "@xeplr/workflow": "^1.1.0",
+    "@xeplr/workflow": "^1.2.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.0",
     "multer": "^2.0.2"

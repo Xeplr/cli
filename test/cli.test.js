@@ -335,9 +335,11 @@ test('every app has flows, run by @xeplr/workflow inside the API, in the app dat
   ['api/routes/flows.js', 'ui/src/api/flows.js', 'ui/src/pages/Flows.jsx', 'ui/src/pages/FlowsHome.jsx', 'ui/src/pages/FlowDesigner.jsx', 'ui/src/pages/Journey.jsx'].forEach(function (rel) {
     assert.ok(result.written.indexOf(rel) !== -1, rel + ' is written');
   });
-  // The version the app installs — 1.1.0 is where embedding (its own database,
-  // the host's tenancy and permissions) and the 2.0 condition language landed.
-  assert.match(read('api/package.json'), /"@xeplr\/workflow": "\^1\.1\.0"/);
+  // The version the app installs — 1.2.0 is where a Screen became a step in
+  // any workflow, a flow became addressable by its key, and the run routes
+  // stopped demanding kind 'screens'. An app on 1.1.0 serves a designer that
+  // draws steps its own API answers 404 for.
+  assert.match(read('api/package.json'), /"@xeplr\/workflow": "\^1\.2\.0"/);
 
   // Started in ONE place (api/workflow.js), in the app's own database,
   // following its tenancy — by the API, or on its own port.
@@ -368,7 +370,13 @@ test('every app has flows, run by @xeplr/workflow inside the API, in the app dat
   // The factory's screens-only builder is not imported — it may still be
   // NAMED, in the comment saying why it is gone.
   assert.doesNotMatch(designer, /import[^\n]*FlowBuilder/, 'the factory builder is not a second designer');
-  assert.match(read('ui/package.json'), /"@xeplr\/ui-workflow": "\^1\.1\.0"/);
+  assert.match(read('ui/package.json'), /"@xeplr\/ui-workflow": "\^1\.2\.0"/);
+  // The API validates a screen with @xeplr/ui-factory/model, so ITS copy must
+  // never be older than the browser's — a server on an older model rejects
+  // what the newer builder writes, and says the screen has problems the
+  // moment somebody adds a control.
+  assert.match(read('api/package.json'), /"@xeplr\/ui-factory": "\^1\.1\.0"/);
+  assert.match(read('ui/package.json'), /"@xeplr\/ui-factory": "\^1\.1\.0"/);
 
   // THIS APP'S FORMS ARE THE FLOW'S SCREENS, and the wiring for that is a
   // PACKAGE, not lines in a generated app. Both props come from one hook:
