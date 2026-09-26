@@ -38,4 +38,5 @@ The API (`@xeplr/base-apis`) and the sign-in service (`@xeplr/auth`), with this 
 | `__PREFIX___CONNECTION`, `AUTH_DB_CONNECTION_INFO_ENCRYPTED` | the database, encrypted — `npm run db:encrypt` |
 | `DB_API`, `AUTH_DB_NAME` | the two database names — never guessed |
 | `AUTH_SUPER_ADMIN_EMAIL` / `_PASSWORD` | the first account — created once, when the sign-in database is first set up |
+| `AUTH_TENANT_HEADER` | `none`: one set of roles for everyone. A multi-tenant app names its company header (e.g. `x-company-id`), so a role made inside a company belongs to it |
 | `EMAIL_PROVIDER` and its settings | optional; without them sign-in works, but activation and reset links cannot be sent |

@@ -50,6 +50,12 @@ XEPLR_AUTH_MIGRATIONS=./node_modules/@xeplr/factory/migrations-auth,./migrations
 AUTH_SUPER_ADMIN_EMAIL=__ADMIN_EMAIL__
 AUTH_SUPER_ADMIN_PASSWORD=__ADMIN_PASSWORD__
 
+# ── Which company a role belongs to ──
+# none: this app has one set of roles for everyone. A multi-tenant app names
+# the header that carries the company id instead (e.g. x-company-id), so a
+# role made inside a company belongs to that company.
+AUTH_TENANT_HEADER=none
+
 # ── Links that go out in emails ──
 # FULLY QUALIFIED, and they point at UI pages rather than at the API. The
 # sign-in service builds these links and appends the token as ?token=... — an
