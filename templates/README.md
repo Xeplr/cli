@@ -21,9 +21,6 @@ cd ui  && npm run dev            # the app           http://localhost:__UI_PORT_
 
 Open http://localhost:__UI_PORT__ and sign in as `__ADMIN_EMAIL__`.
 
-Flows (Xeplr Workflow) run **inside the API** — nothing else to start. To run
-them as their own service instead, see "Where each address goes" below.
-
 ## Where each address goes
 
 The browser only ever calls **paths** on the app's own address — never a port.
@@ -33,39 +30,24 @@ locally (`ui/vite.config.js`, from `ui/.env`), nginx in production.
 | path | served by | local (`ui/.env`) | production (nginx) |
 |---|---|---|---|
 | `/auth/api/…` | the sign-in service | `AUTH_URL` | `127.0.0.1:<AUTH_PORT>` |
-| `/api/workflow/…` | flows — `@xeplr/workflow` | `WORKFLOW_URL`, or `API_URL` when blank | the workflow process, or the API when it runs inside |
 | `/api/…`, `/health`, `/whoami` | the API | `API_URL` | `127.0.0.1:<__PREFIX___PORT>` |
-
-**Workflow on its own port.** Set `WORKFLOW_PORT` in `api/development.env`
-(this app's next free port is __NEXT_PORT__), set `WORKFLOW_URL` in `ui/.env` to
-`http://localhost:__NEXT_PORT__`, and start it beside the API:
-
-```bash
-cd api && npm run start-workflow   # flows            http://localhost:__NEXT_PORT__
-```
-
-Same database, same sign-in, same permissions and the same `/api/workflow/…`
-paths — only the process differs. Leave `WORKFLOW_PORT` blank and it runs inside
-the API again.
 
 ### Production
 
 `api/production.env.example` lists every setting (copy it to
 `api/production.env`, fill in, start with `NODE_ENV=production`). Build the UI
-(`cd ui && npm run build`) and let nginx serve it and route the paths — the
-more specific `/api/workflow/` first:
+(`cd ui && npm run build`) and let nginx serve it and route the paths:
 
 ```nginx
 server {
   server_name app.example.com;
   root /srv/__NAME__/ui/dist;
 
-  location /auth/api/     { proxy_pass http://127.0.0.1:__AUTH_PORT__; }
-  location /api/workflow/ { proxy_pass http://127.0.0.1:__API_PORT__; }   # or WORKFLOW_PORT when it runs on its own
-  location /api/          { proxy_pass http://127.0.0.1:__API_PORT__; }
-  location = /health      { proxy_pass http://127.0.0.1:__API_PORT__; }
-  location = /whoami      { proxy_pass http://127.0.0.1:__API_PORT__; }
-  location /              { try_files $uri /index.html; }   # the React app's own pages
+  location /auth/api/ { proxy_pass http://127.0.0.1:__AUTH_PORT__; }
+  location /api/      { proxy_pass http://127.0.0.1:__API_PORT__; }
+  location = /health  { proxy_pass http://127.0.0.1:__API_PORT__; }
+  location = /whoami  { proxy_pass http://127.0.0.1:__API_PORT__; }
+  location /          { try_files $uri /index.html; }   # the React app's own pages
 }
 ```
 
@@ -84,7 +66,6 @@ Every one of these checks the same sign-in token, so one login covers them all.
 
   > Create a new UI for farming departments. One record is a farming department with: Name (required), Region (dropdown: North, South, East, West), Area in acres (number, at least 0), Started on (date), Notes (long text). Show Name, Region and Area in the list. Follow "Create a new UI" in CLAUDE.md.
 
-__WF_README__
 ## Rules this app follows
 
 | Rule | Why |
