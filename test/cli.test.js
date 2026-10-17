@@ -217,6 +217,28 @@ test('a name that would break a folder, a package or a database is refused', fun
   });
 });
 
+test('every name the CLI allows gives database names @xeplr/db will create', function () {
+  // NAME_RE allows dashes and refuses underscores; ensureDatabase refuses
+  // dashes. So "x-doit" once gave x-doit_auth and set-up died with
+  // "Unsafe database name".
+  assert.deepStrictEqual(questions.databaseNames('x-doit'), { auth: 'x_doit_auth', api: 'x_doit_api' });
+  ['yyan', 'my-app', 'a1', 'smart-asset-management'].forEach(function (name) {
+    var db = questions.databaseNames(name);
+    assert.match(db.auth, questions.DB_NAME_RE, name + ' → ' + db.auth);
+    assert.match(db.api, questions.DB_NAME_RE, name + ' → ' + db.api);
+  });
+});
+
+test('the settings name the databases the CLI planned, not ones built from the raw name', function () {
+  var dir = path.join(tmpdir(), 'my-app');
+  generate.generate(answers({ name: 'my-app', prefix: 'MY_APP', databases: questions.databaseNames('my-app') }), dir);
+  ['development.env', 'production.env.example'].forEach(function (file) {
+    var env = fs.readFileSync(path.join(dir, 'api', file), 'utf8');
+    assert.match(env, /^DB_API=my_app_api$/m, file);
+    assert.match(env, /^AUTH_DB_NAME=my_app_auth$/m, file);
+  });
+});
+
 // ── runs on Windows too ─────────────────────────────────────────────────────
 
 test('no generated script uses a unix-only env prefix', function () {

@@ -119,6 +119,12 @@ see **Configure UI** in the settings menu, top right.
 (`<name>_auth`, `<name>_api`); an existing database is kept as it is, with its
 accounts — the super admin you enter is created only in a fresh one.
 
+Dashes in the name become underscores in the database names: `my-app` gets
+`my_app_auth` and `my_app_api`. `@xeplr/db` creates only plain identifiers
+(letters, digits, `_`) because `CREATE DATABASE` cannot take its name as a
+parameter, and the project name itself cannot hold `_` (it is also a folder and
+a package name).
+
 `xeplr new myapp --no-install` only writes the files; then run `npm install` in
 `api` and `ui`, and `npm run setup` in `api`, yourself. If set-up stops part
 way (Postgres not running, say), the installer says which step and the command

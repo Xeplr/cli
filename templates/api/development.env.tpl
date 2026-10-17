@@ -20,8 +20,8 @@ AUTH_DB_CONNECTION_INFO_ENCRYPTED=__DB_CONNECTION__
 # ── Databases ──
 # Two of them: accounts in one, your own data in the other. Both are created
 # for you the first time you run the setup.
-DB_API=__NAME___api
-AUTH_DB_NAME=__NAME___auth
+DB_API=__DB_API__
+AUTH_DB_NAME=__DB_AUTH__
 
 # ── Sign-in service ──
 #

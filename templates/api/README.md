@@ -6,7 +6,7 @@ The API (`@xeplr/base-apis`) and the sign-in service (`@xeplr/auth`), with this 
 
 | Command | Does |
 |---|---|
-| `npm run setup` | create both databases (`__NAME___auth`, `__NAME___api`), the sign-in tables, permissions and menus |
+| `npm run setup` | create both databases (`__DB_AUTH__`, `__DB_API__`), the sign-in tables, permissions and menus |
 | `npm run start-auth` | the sign-in service, port __AUTH_PORT__ — refuses to start without Redis or `REDIS_PREFIX`; its banner says whether email works |
 | `npm run start-api` | the API, port __API_PORT__ — runs `migrations/` and publishes never-published screens on start |
 | `npm run migrate:auth` | apply new `migrations-auth/*.sql` (a new menu row, say), then restart sign-in |
