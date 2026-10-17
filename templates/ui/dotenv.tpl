@@ -6,4 +6,3 @@
 UI_PORT=__UI_PORT__
 AUTH_URL=http://localhost:__AUTH_PORT__
 API_URL=http://localhost:__API_PORT__
-__WF_UI_ENV__

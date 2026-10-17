@@ -11,7 +11,6 @@ export const FORM_MENU_PREFIX = 'form:'
 export const APP_MENU_KEYS = [
   'Home',
   'Tasks',
-  'Flows',
 __MT_MENU_KEY__
   'Admin',
   'Configure UI'

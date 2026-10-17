@@ -41,12 +41,6 @@ Already working, with nothing to wire up:
   - **Menu**: rename, reorder and hide the side rail's items.
 
   Nobody else sees it, and the API refuses everyone else.
-- **Flows, in every app** — your forms one after another, where what someone
-  fills in decides the next screen. Designed in Configure UI → Flows, walked at
-  `/journey/<key>`, and resumable. Run by `@xeplr/workflow` **inside the API**,
-  in the app's own database — nothing extra to start, no port, no setting. It
-  follows the app's tenancy (none, or the levels you chose) and never creates
-  companies or workspaces of its own.
 - **Multi-tenancy, if you ask for it** — companies (or companies and
   workspaces, up to four levels). Every row is stamped with the one it was made
   in, every read sees only its rows, membership is checked on every request,
@@ -77,7 +71,7 @@ These are architecture decisions, not defaults to tune — each one exists becau
 | **`REDIS_PREFIX` is required and unique per app** (`api/development.env`, set to `<name>:`). | `@xeplr/auth`, `@xeplr/utils` | Two apps on one Redis under the shared default serve each other's sessions, menus and API permissions. Sign-in refuses to start without it, or with `xeplr:`. |
 | **Designing, new forms and publishing are Super Admin only.** | `api/routes/access.js`, `@xeplr/auth` menu routes | Publishing changes database tables. Every other screen route checks the permission catalog. |
 | **The browser is not a security boundary.** Front-end hooks (`ui/src/pages/Edit<Form>.jsx`) shape what people see and send; anything that must hold goes in server hooks (`api/screens/<form>/<form>.hooks.js`); data shape in the model (`<form>.model.js`). | `@xeplr/ui-factory`, `@xeplr/factory` | |
-| **Anything every app would write identically lives in a package, not in the generated app.** A generated app is a starting point that then lives its own life — glue copied into it can never be fixed centrally, so an app made last month keeps that copy forever. When the flow designer needed this app's forms as its Screen steps, the wiring went into `@xeplr/ui-factory` (`useScreenSource`) and the generated page passes two props. | `@xeplr/ui-factory`, `@xeplr/ui-workflow` | A fix or a new control type has to reach apps that already exist, and it cannot reach code that was copied into them. `test/cli.test.js` fails if the glue reappears in the generated app. |
+| **Anything every app would write identically lives in a package, not in the generated app.** A generated app is a starting point that then lives its own life — glue copied into it can never be fixed centrally, so an app made last month keeps that copy forever. When Configure UI → Masters needed to know which forms are masters, that answer went into `@xeplr/ui-factory` (`useScreenSource`) and the generated page only reads `masters`. | `@xeplr/ui-factory` | A fix or a new control type has to reach apps that already exist, and it cannot reach code that was copied into them. `test/cli.test.js` fails if the glue reappears in the generated app. |
 | **Every data address is under `/api`.** | `api/routes`, `ui/vite.config.js` | A page path and a data path must never collide. |
 | **No guessed database names or connections.** | `api/development.env` | A wrong-but-present value starts cleanly and reads as empty data. |
 | **Email is checked at start, never fatal.** The sign-in banner shows `email ✓ …` or `✗ NOT WORKING — reason`. | `@xeplr/auth` | Sign-in works without email; activation, invite and reset links cannot be sent until `EMAIL_PROVIDER` is set. |
@@ -205,14 +199,6 @@ no defaults, ever.
 | Database connection | host, port, user, password — or skip, and fill it in later |
 
 Encryption keys and signing secrets are **generated, never asked**.
-
-**Flows, inside the API.** `@xeplr/workflow` is a dependency of `api/`, and
-`bin/www` starts it with `registerWorkflow` after the screens — in the app's
-own database (`DB_API`, its own migration record `workflow_migrations`), with
-`tenantTables: false` so it follows the app's tenancy rather than creating
-`companies` / `workspaces`, and `access: true` so each flows route checks the
-caller's permissions, which its `migrations-auth` grants (loaded through
-`XEPLR_AUTH_MIGRATIONS`).
 
 ## Licence
 

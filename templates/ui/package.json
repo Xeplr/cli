@@ -17,7 +17,6 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.2",
-    "@xeplr/ui-workflow": "^1.2.0",
     "@xeplr/ui-utils": "^1.0.2"
   },
   "devDependencies": {

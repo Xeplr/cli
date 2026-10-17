@@ -358,19 +358,3 @@ body { margin: 0; }
 .app-menu-shown { display: inline-flex; gap: 6px; align-items: center; }
 
 .app-menu-settings .app-table { margin-bottom: 14px; }
-
-/* ── Flows, before Workflow is connected (src/pages/Flows.jsx) ─────────────── */
-.app-connect {
-  max-width: 720px;
-  padding: 22px 24px;
-  border: 1px solid var(--xeplr-border-primary);
-  border-radius: 10px;
-  background: var(--xeplr-bg-tertiary);
-  line-height: 1.55;
-}
-.app-connect h2 { margin: 0 0 8px; font-size: 18px; }
-.app-connect p { margin: 0 0 14px; }
-.app-connect-steps { margin: 0 0 14px; padding-left: 20px; }
-.app-connect-steps li { margin-bottom: 14px; }
-.app-connect code { font-size: 12.5px; padding: 1px 5px; border-radius: 4px; background: var(--xeplr-bg-secondary); border: 1px solid var(--xeplr-border-primary); }
-.app-connect pre { margin: 6px 0 0; font-size: 12.5px; }
