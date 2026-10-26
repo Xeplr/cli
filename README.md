@@ -41,6 +41,19 @@ Already working, with nothing to wire up:
   - **Menu**: rename, reorder and hide the side rail's items.
 
   Nobody else sees it, and the API refuses everyone else.
+- **Flows, in every app** — your forms one after another. Designed in
+  Configure UI → Flows: for each screen, the app's functions that run around
+  its records (its events) and where the journey goes once it is saved — a
+  screen, a function that decides, or the end. Walked at `/journey/<key>`, and
+  resumable. Run by `@xeplr/workflow-api` **inside the API**, in a database of
+  its own (`<name>_workflow`, created on first start) — nothing extra to start.
+  It follows the app's tenancy (none, or the levels you chose) and never creates
+  companies or workspaces of its own. Approvals (another person's turn) are not
+  part of it.
+- **Functions** — `api/functions/`: the app's own code, registered with
+  `@xeplr/actions` by the event it is for (`beforeSave`, `afterSave`, …,
+  `decide`) and picked by name in a screen's events or a flow step. Two to start
+  from: `tidyTaskTitle` (Tasks' `beforeSave`) and `byPriority` (a `decide`).
 - **Multi-tenancy, if you ask for it** — companies (or companies and
   workspaces, up to four levels). Every row is stamped with the one it was made
   in, every read sees only its rows, membership is checked on every request,
@@ -71,7 +84,7 @@ These are architecture decisions, not defaults to tune — each one exists becau
 | **`REDIS_PREFIX` is required and unique per app** (`api/development.env`, set to `<name>:`). | `@xeplr/auth`, `@xeplr/utils` | Two apps on one Redis under the shared default serve each other's sessions, menus and API permissions. Sign-in refuses to start without it, or with `xeplr:`. |
 | **Designing, new forms and publishing are Super Admin only.** | `api/routes/access.js`, `@xeplr/auth` menu routes | Publishing changes database tables. Every other screen route checks the permission catalog. |
 | **The browser is not a security boundary.** Front-end hooks (`ui/src/pages/Edit<Form>.jsx`) shape what people see and send; anything that must hold goes in server hooks (`api/screens/<form>/<form>.hooks.js`); data shape in the model (`<form>.model.js`). | `@xeplr/ui-factory`, `@xeplr/factory` | |
-| **Anything every app would write identically lives in a package, not in the generated app.** A generated app is a starting point that then lives its own life — glue copied into it can never be fixed centrally, so an app made last month keeps that copy forever. When Configure UI → Masters needed to know which forms are masters, that answer went into `@xeplr/ui-factory` (`useScreenSource`) and the generated page only reads `masters`. | `@xeplr/ui-factory` | A fix or a new control type has to reach apps that already exist, and it cannot reach code that was copied into them. `test/cli.test.js` fails if the glue reappears in the generated app. |
+| **Anything every app would write identically lives in a package, not in the generated app.** A generated app is a starting point that then lives its own life — glue copied into it can never be fixed centrally, so an app made last month keeps that copy forever. When the flow designer needed this app's forms, its functions and its flows, the wiring went into `@xeplr/ui-factory` (`FlowDesignerPage`) and the generated page passes its two API clients. | `@xeplr/ui-factory` | A fix or a new control type has to reach apps that already exist, and it cannot reach code that was copied into them. `test/cli.test.js` fails if the glue reappears in the generated app. |
 | **Every data address is under `/api`.** | `api/routes`, `ui/vite.config.js` | A page path and a data path must never collide. |
 | **No guessed database names or connections.** | `api/development.env` | A wrong-but-present value starts cleanly and reads as empty data. |
 | **Email is checked at start, never fatal.** The sign-in banner shows `email ✓ …` or `✗ NOT WORKING — reason`. | `@xeplr/auth` | Sign-in works without email; activation, invite and reset links cannot be sent until `EMAIL_PROVIDER` is set. |
@@ -145,7 +158,7 @@ Two ways, both in the running app's project:
   > (file: .pdf or .jpg), Notes (long text). Show Name, Region and Area in the
   > list. Follow "Create a new UI" in CLAUDE.md.
 
-  Claude follows `CLAUDE.md`: the screens and server hooks and model
+  Claude follows `CLAUDE.md`: the screens and server functions and model
   (`npx xeplr-factory screens … --no-pages`), the page with its front-end hooks,
   the route, the side-rail item and its menu row. Then restart the sign-in
   service and the API — the API publishes the new screens and creates the table.
@@ -159,7 +172,7 @@ Two ways, both in the running app's project:
 | `api/` | `npm run start-api` | the API — runs migrations and publishes never-published screens on start |
 | `api/` | `npm run migrate:auth` | apply new `migrations-auth/*.sql` (e.g. a new menu row) |
 | `api/` | `npm run db:encrypt` | redo the encrypted database connection |
-| `api/` | `npx xeplr-factory screens screens/<form>/<form>.entity.json -o screens/<form> --no-pages` | a form's screens, server hooks and model from its spec |
+| `api/` | `npx xeplr-factory screens screens/<form>/<form>.entity.json -o screens/<form> --no-pages` | a form's screens, server functions and model from its spec |
 | `api/` | `npx xeplr-factory validate <screen>.json` | check a screen document |
 | `ui/` | `npm run dev` | the app |
 
@@ -205,6 +218,17 @@ no defaults, ever.
 | Database connection | host, port, user, password — or skip, and fill it in later |
 
 Encryption keys and signing secrets are **generated, never asked**.
+
+**Flows, inside the API.** `@xeplr/workflow-api` is a dependency of `api/`,
+and `bin/www` starts it with `registerWorkflow` after the screens — in a
+database of its own (`DB_WORKFLOW`, `<name>_workflow`: a sub-product embedded in
+an app keeps its tables apart, and creates the database on first start), with
+`tenantTables: false` so it follows the app's tenancy rather than creating
+`companies` / `workspaces`, and `access: true` so each flows route checks the
+caller's permissions, which its `migrations-auth` grants (loaded through
+`XEPLR_AUTH_MIGRATIONS`). The designer is `@xeplr/ui-factory`'s
+`FlowDesignerPage`; the paid canvas designer (X-Flow) is not part of a
+generated app.
 
 ## Licence
 

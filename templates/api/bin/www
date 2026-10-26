@@ -33,6 +33,10 @@ var path = require('path');
 var { resolveConfig } = require('@xeplr/db');
 var { up } = require('@xeplr/db').sqlMigrator;
 var factory = require('@xeplr/factory');
+// This app's functions — what screens' events and flows' "let a function
+// decide" pick by name. Registered before anything can publish a screen that
+// names one.
+require('../functions');
 var screens = require('../screens');
 
 async function start() {
@@ -58,15 +62,13 @@ async function start() {
   // time has no connection at all until this has finished.
   var knex = await require('../db/setup');
 
-  // The screens, their hooks and their models. A hooks file with a typo
-  // ("beforeSave") or a malformed model stops startup here, rather than
-  // silently never running.
+  // The screens and their models. A malformed model stops startup here,
+  // rather than silently never running.
   // filesDir: where a form's file field puts what people upload. Nothing is
   // served from it — a file comes back only through the factory's own route,
   // which checks the caller the way reading a record does.
   await factory.init({
     knex: knex,
-    hooks: screens.hooks,
     models: screens.models,
     filesDir: process.env.FACTORY_FILES_DIR
   });
@@ -76,7 +78,13 @@ async function start() {
   var published = await factory.publishScreens(screens.documents);
   if (published.published.length) console.log('[api] published screens: ' + published.published.join(', '));
 
-  require('../app')();
+  // FLOWS — @xeplr/workflow-api, inside this API, in a database of its own
+  // (DB_WORKFLOW — created and migrated on first start). It follows this
+  // app's tenancy and creates no companies or workspaces of its own.
+  var buildApp = require('../app');
+  require('../routes/flows').mount(await require('../workflow')(buildApp.memberGate));
+
+  buildApp();
 }
 
 start().catch(function(err) {
