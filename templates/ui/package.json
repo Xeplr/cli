@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",
-    "@xeplr/ui-account": "^1.0.9",
+    "@xeplr/ui-account": "^1.4.0",
     "@xeplr/ui-canvas": "^1.1.0",
     "@xeplr/ui-factory": "^1.7.1",
     "@xeplr/ui-table": "^1.0.6",

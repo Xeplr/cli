@@ -68,3 +68,4 @@ Replace the bold parts. Add behaviour in the same message if you want it — "a 
 - The browser is not a security boundary: anything that must hold goes in a server function, named in the screen's events.
 - Hooks and models are **methods** calling `super` — never arrow-function properties.
 - `authFetch` returns the parsed body, not a Response.
+- Sign-up needs email and `AUTH_REGISTER_ROLES` (the role a new account gets, in `api/development.env`); without either, registration is refused on purpose — never work around it by activating accounts or granting roles in SQL. An admin can activate an account from the User Roles screen.

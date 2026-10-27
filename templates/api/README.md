@@ -41,4 +41,10 @@ The API (`@xeplr/base-apis`) and the sign-in service (`@xeplr/auth`), with this 
 | `DB_API`, `AUTH_DB_NAME` | the two database names — never guessed |
 | `AUTH_SUPER_ADMIN_EMAIL` / `_PASSWORD` | the first account — created once, when the sign-in database is first set up |
 | `AUTH_TENANT_HEADER` | `none`: one set of roles for everyone. A multi-tenant app names its company header (e.g. `x-company-id`), so a role made inside a company belongs to it |
-| `EMAIL_PROVIDER` and its settings | optional; without them sign-in works, but activation and reset links cannot be sent |
+| `AUTH_ACTIVATION_URL`, `AUTH_INVITE_URL`, `AUTH_RESET_URL` | the UI pages the emailed links open; the token is appended. The reset address is never taken from the request |
+| `AUTH_REGISTER_ROLES` | the role a new sign-up gets when activated (`Viewer`). **Required to register:** unset, or naming a role that does not exist, and registration is refused |
+| `EMAIL_PROVIDER` and its settings | needed to register, resend an activation link, invite or reset a password — each is refused while email does not work. Signing in works without it |
+
+## Sign-up
+
+Register → an activation email → the link (or an admin's **Activate** on the User Roles screen) → sign in. Lost the email? `/auth/resend-activation` sends a new one. Invited people set their password at `/auth/accept-invite`.

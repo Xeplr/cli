@@ -596,6 +596,10 @@ test('the sample form uses every control, over steps, and opens on a page of its
 
   // Uploads: somewhere to put them, multer to receive them, and never committed.
   assert.match(fs.readFileSync(path.join(dir, 'api/development.env'), 'utf8'), /FACTORY_FILES_DIR=/);
+  // Sign-up refuses without these; a fresh app must ship them set.
+  var signupEnv = fs.readFileSync(path.join(dir, 'api/development.env'), 'utf8');
+  assert.match(signupEnv, /^AUTH_RESET_URL=http:\/\/localhost:\d+\/auth\/reset-password$/m);
+  assert.match(signupEnv, /^AUTH_REGISTER_ROLES=Viewer$/m);
   assert.match(fs.readFileSync(path.join(dir, 'api/bin/www'), 'utf8'), /filesDir: process\.env\.FACTORY_FILES_DIR/);
   assert.match(fs.readFileSync(path.join(dir, 'api/package.json'), 'utf8'), /"multer"/);
   assert.match(fs.readFileSync(path.join(dir, 'api/.gitignore'), 'utf8'), /uploads\//);

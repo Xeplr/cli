@@ -65,6 +65,16 @@ AUTH_TENANT_HEADER=none
 # email template can carry a token as a value but cannot build an address.
 AUTH_ACTIVATION_URL=http://localhost:__UI_PORT__/auth/activate
 AUTH_INVITE_URL=http://localhost:__UI_PORT__/auth/accept-invite
+# Never taken from the request: a link built from its Host header could point
+# a real user's reset mail at someone else's site. Unset, reset is refused.
+AUTH_RESET_URL=http://localhost:__UI_PORT__/auth/reset-password
+
+# ── The role a new sign-up gets ──
+# Given when the account is activated. Without a role a person can sign in
+# and do nothing — not even open their own profile. No default: unset, or a
+# role that does not exist, and registration is refused. Comma-separate for
+# more than one; Super Admin is never allowed here.
+AUTH_REGISTER_ROLES=Viewer
 
 # ── Uploaded files ──
 # Where a form's FILE field puts what people upload. The path is what the
@@ -72,10 +82,12 @@ AUTH_INVITE_URL=http://localhost:__UI_PORT__/auth/accept-invite
 # which checks the caller the way reading a record does. Relative to api/.
 FACTORY_FILES_DIR=./uploads/factory
 
-# ── Email (optional) ──
-# Without it sign-in works, but activation, invite and password-reset links
-# cannot be sent. The sign-in service checks it at start and says so in its
-# banner: "email ✓ smtp — host:587, connected" or "✗ NOT WORKING — reason".
+# ── Email ──
+# Needed for anyone but the super admin to get in: registration, resending an
+# activation link, invites and password reset all send a link, and each is
+# refused while email does not work — no half-made accounts. Signing in keeps
+# working without it. The sign-in service checks it at start and says so in
+# its banner: "email ✓ smtp — host:587, connected" or "✗ NOT WORKING — reason".
 # Providers: smtp | brevo | aws | azure — see @xeplr/utils' README.
 # EMAIL_PROVIDER=smtp
 # SMTP_HOST=
@@ -83,4 +95,3 @@ FACTORY_FILES_DIR=./uploads/factory
 # SMTP_USER=
 # SMTP_PASS=
 # SMTP_FROM=
-# (smtp also needs `npm install nodemailer` in this folder)
