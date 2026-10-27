@@ -21,6 +21,9 @@ cd ui  && npm run dev            # the app           http://localhost:__UI_PORT_
 
 Open http://localhost:__UI_PORT__ and sign in as `__ADMIN_EMAIL__`.
 
+Flows (`@xeplr/workflow-api`) run **inside the API**, in a database of their
+own that the API creates on first start — nothing else to start.
+
 ## Where each address goes
 
 The browser only ever calls **paths** on the app's own address — never a port.
@@ -30,6 +33,7 @@ locally (`ui/vite.config.js`, from `ui/.env`), nginx in production.
 | path | served by | local (`ui/.env`) | production (nginx) |
 |---|---|---|---|
 | `/auth/api/…` | the sign-in service | `AUTH_URL` | `127.0.0.1:<AUTH_PORT>` |
+| `/api/workflow/…` | flows — `@xeplr/workflow-api`, inside the API | `API_URL` | `127.0.0.1:<__PREFIX___PORT>` |
 | `/api/…`, `/health`, `/whoami` | the API | `API_URL` | `127.0.0.1:<__PREFIX___PORT>` |
 
 ### Production
@@ -43,11 +47,11 @@ server {
   server_name app.example.com;
   root /srv/__NAME__/ui/dist;
 
-  location /auth/api/ { proxy_pass http://127.0.0.1:__AUTH_PORT__; }
-  location /api/      { proxy_pass http://127.0.0.1:__API_PORT__; }
-  location = /health  { proxy_pass http://127.0.0.1:__API_PORT__; }
-  location = /whoami  { proxy_pass http://127.0.0.1:__API_PORT__; }
-  location /          { try_files $uri /index.html; }   # the React app's own pages
+  location /auth/api/     { proxy_pass http://127.0.0.1:__AUTH_PORT__; }
+  location /api/          { proxy_pass http://127.0.0.1:__API_PORT__; }
+  location = /health      { proxy_pass http://127.0.0.1:__API_PORT__; }
+  location = /whoami      { proxy_pass http://127.0.0.1:__API_PORT__; }
+  location /              { try_files $uri /index.html; }   # the React app's own pages
 }
 ```
 
@@ -57,7 +61,9 @@ Every one of these checks the same sign-in token, so one login covers them all.
 
 - **Sign-in** — login, register, password reset, profile, and the admin screens for users, roles and permissions (`@xeplr/auth`, `@xeplr/ui-account`).
 - **Tasks** — a sample built from screens: a list, and a form it opens on a page of its own, saved into an ordinary `tasks` table. The form is filled in over three steps and uses every control there is — text, a dropdown, radio buttons, a tick box, a date, a date and time, several tags at once, and a file.
-- **Configure UI** — in the settings menu, for Super Admin: every form (make one, design it, publish it, add it to the side rail) and the side rail itself (rename, reorder, hide).
+- **Configure UI** — in the settings menu, for Super Admin: every form (make one, design it, publish it, add it to the side rail), every flow (screens one after another — each screen's events, and where it goes next) and the side rail itself (rename, reorder, hide).
+- **Flows** — in the side rail: the journeys people can start, run by `@xeplr/workflow-api` inside the API.
+- **Functions** — `api/functions/`: your code, registered by event and picked by name in a screen's events or a flow step (see "Functions" below).
 
 ## Create a new UI
 
@@ -66,6 +72,7 @@ Every one of these checks the same sign-in token, so one login covers them all.
 
   > Create a new UI for farming departments. One record is a farming department with: Name (required), Region (dropdown: North, South, East, West), Area in acres (number, at least 0), Started on (date), Notes (long text). Show Name, Region and Area in the list. Follow "Create a new UI" in CLAUDE.md.
 
+__WF_README__
 ## Rules this app follows
 
 | Rule | Why |
@@ -74,7 +81,7 @@ Every one of these checks the same sign-in token, so one login covers them all.
 | A **key** and a **label**, everywhere: code uses keys (form keys, menu keys); people read labels, renamed in Configure UI. | Renaming what people see never breaks code. |
 | **`REDIS_PREFIX`** in `api/development.env` is required and unique to this app. | Apps sharing a Redis would otherwise serve each other's sessions and permissions. |
 | Designing and publishing forms is **Super Admin only**. | Publishing changes database tables. |
-| Rules that must hold go in **server hooks**; the browser only shapes what people see and send. | The browser is not a security boundary. |
+| Rules that must hold go in **server functions** (`api/functions/`), named in a screen's events; the browser only shapes what people see and send. | The browser is not a security boundary. |
 | Every data address is under **`/api`**. | A page and a data path must never collide. |
 
 The full list, and where each piece lives, is in `CLAUDE.md`.

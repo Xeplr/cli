@@ -16,8 +16,11 @@
 //   screens/<form>/<form>.entity.json       its name and fields
 //   screens/<form>/<form>-list.screen.json  the list
 //   screens/<form>/<form>-edit.screen.json  the add / edit form
-//   screens/<form>/<form>.hooks.js          server hooks — save / get / delete
 //   screens/<form>/<form>.model.js          server model — getters / setters
+//
+// Code around a form's records — checks on save, an email after — is not in
+// these folders: it is a FUNCTION in functions/, named in the screen's
+// `events` (task-edit.screen.json names tidyTaskTitle).
 
 module.exports = {
   // Publish order is worked out for you: a table before the dropdowns that
@@ -26,11 +29,6 @@ module.exports = {
     require('./task/task-edit.screen.json'),
     require('./task/task-list.screen.json')
   ],
-
-  // Your own code around save / get / delete, per screen — see task/task.hooks.js.
-  hooks: {
-    task_edit: require('./task/task.hooks')
-  },
 
   // How each table's values are shaped — see task/task.model.js.
   models: [

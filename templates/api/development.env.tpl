@@ -18,10 +18,12 @@ __PREFIX___CONNECTION=__DB_CONNECTION__
 AUTH_DB_CONNECTION_INFO_ENCRYPTED=__DB_CONNECTION__
 
 # ── Databases ──
-# Two of them: accounts in one, your own data in the other. Both are created
-# for you the first time you run the setup.
-DB_API=__NAME___api
-AUTH_DB_NAME=__NAME___auth
+# Three of them: accounts, your own data, and flows (workflow's own, kept apart
+# from yours). The first two are created by the setup; the flows one by the API
+# the first time it starts.
+DB_API=__DB_API__
+AUTH_DB_NAME=__DB_AUTH__
+DB_WORKFLOW=__DB_WORKFLOW__
 
 # ── Sign-in service ──
 #
@@ -40,9 +42,10 @@ AUTH_JWT_SECRET=__JWT_SECRET__
 # Where the sign-in service is. Your API asks it to check every token.
 AUTH_URL=http://localhost:__AUTH_PORT__
 
-# Sign-in setup files: the screens' permissions (@xeplr/factory's), then this
-# app's own — menu entries and anything else it adds. Comma-separated, in order.
-XEPLR_AUTH_MIGRATIONS=./node_modules/@xeplr/factory/migrations-auth,./migrations-auth
+# Sign-in setup files: the screens' permissions (@xeplr/factory's), flows'
+# (@xeplr/workflow-api's), then this app's own — menu entries and anything else
+# it adds. Comma-separated, in order.
+XEPLR_AUTH_MIGRATIONS=./node_modules/@xeplr/factory/migrations-auth,./node_modules/@xeplr/workflow-api/migrations-auth,./migrations-auth
 
 # ── The first account you sign in with ──
 # Created for you when you set up the database. Change the password here and

@@ -26,4 +26,8 @@ module.exports = [
   // error — the most expensive way for this to go wrong.
   'DB_API',
   '__PREFIX___CONNECTION',
+
+  // Flows' own database (DB_WORKFLOW) — workflow is embedded in this API but
+  // keeps its tables apart from yours. The library names it.
+  ...require('@xeplr/workflow-api').embedRequiredEnv,
 ];
