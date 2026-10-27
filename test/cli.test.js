@@ -240,6 +240,35 @@ test('the settings name the databases the CLI planned, not ones built from the r
   });
 });
 
+test('the wizard plans the workflow database and the plan shows it', async function () {
+  // Driven through a real session with piped answers, as `xeplr new` would be
+  // when its input is not a terminal.
+  var plan = require('../lib/plan');
+  var input = new PassThrough();
+  var output = new PassThrough();
+  output.resume();
+  var session = prompt.createSession({ input: input, output: output });
+  input.write([
+    '19300',              // port decade
+    '',                   // admin email → default
+    '',                   // admin password → default
+    'y', 'company',       // multi-tenant, one level
+    'y', '', '', '', 'pw' // database: host, port, user → defaults; password
+  ].join('\n') + '\n');
+
+  var a = await questions.collect(session, 'my-app');
+  session.close();
+
+  assert.deepStrictEqual(a.databases, { auth: 'my_app_auth', api: 'my_app_api', workflow: 'my_app_workflow' });
+  assert.deepStrictEqual(a.ports, { ui: 19300, auth: 19301, api: 19302 });
+  assert.strictEqual(a.admin.email, 'admin@my-app.local');
+  assert.ok(a.connection, 'the connection is encrypted into one setting');
+
+  var text = plan.describe(a);
+  assert.match(text, /my_app_workflow\s+flows and their runs/);
+  assert.match(text, /my_app_auth/);
+});
+
 // ── runs on Windows too ─────────────────────────────────────────────────────
 
 test('no generated script uses a unix-only env prefix', function () {
