@@ -34,4 +34,8 @@ router.get('/whoami', function(req, res) {
 //   var { genericRoute } = require('@xeplr/base-apis');
 //   router.use('/api/things', genericRoute({ key: 'thing', model: require('../models').Thing }));
 
+// Flows: @xeplr/workflow-api, at /api/workflow, running inside this API (see
+// routes/flows.js and workflow.js).
+router.use('/api/workflow', require('./flows'));
+
 module.exports = router;

@@ -6,13 +6,13 @@ The API (`@xeplr/base-apis`) and the sign-in service (`@xeplr/auth`), with this 
 
 | Command | Does |
 |---|---|
-| `npm run setup` | create both databases (`__NAME___auth`, `__NAME___api`), the sign-in tables, permissions and menus |
+| `npm run setup` | create both databases (`__DB_AUTH__`, `__DB_API__`), the sign-in tables, permissions and menus |
 | `npm run start-auth` | the sign-in service, port __AUTH_PORT__ — refuses to start without Redis or `REDIS_PREFIX`; its banner says whether email works |
 | `npm run start-api` | the API, port __API_PORT__ — runs `migrations/` and publishes never-published screens on start |
 | `npm run migrate:auth` | apply new `migrations-auth/*.sql` (a new menu row, say), then restart sign-in |
 | `npm run db:encrypt` | redo the encrypted database connection |
 | `npm run check-env` | check every required setting is present |
-| `npx xeplr-factory screens screens/<form>/<form>.entity.json -o screens/<form> --no-pages` | a form's screens, server hooks and model from its spec |
+| `npx xeplr-factory screens screens/<form>/<form>.entity.json -o screens/<form> --no-pages` | a form's screens, server functions and model from its spec |
 | `npx xeplr-factory validate <screen>.json` | check a screen document |
 
 ## Layout
@@ -24,7 +24,9 @@ The API (`@xeplr/base-apis`) and the sign-in service (`@xeplr/auth`), with this 
 | `app.js` | the Express app: the auth gate, and the routes |
 | `routes/index.js` | this app's own routes — every data address under `/api` |
 | `routes/access.js` | who may design and publish forms (Super Admin) |
-| `screens/` | the forms this app ships with: per form, its spec, list and edit screens, server hooks and model — registered in `screens/index.js` |
+| `screens/` | the forms this app ships with: per form, its spec, list and edit screens, server functions and model — registered in `screens/index.js` |
+| `functions/` | this app's functions — the code screens' events and flows' `decide` pick by name — registered with `@xeplr/actions` by event, loaded at startup |
+| `workflow.js` | flows: `@xeplr/workflow-api` started inside this API, in its own database (`DB_WORKFLOW`) |
 | `uploads/` | what people attach through a form's **file** field (`FACTORY_FILES_DIR`). Never committed, and never served: a file comes back only through the API's own route, which checks the caller the way reading a record does |
 | `migrations/` | hand-written SQL for tables no form owns |
 | `migrations-auth/` | this app's rows in the sign-in database — menus (by key), permissions |

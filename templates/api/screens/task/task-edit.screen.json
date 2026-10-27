@@ -269,5 +269,8 @@
       }
     }
   ],
-  "source": "tasks"
+  "source": "tasks",
+  "events": {
+    "beforeSave": "tidyTaskTitle"
+  }
 }

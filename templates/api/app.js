@@ -13,6 +13,8 @@ var memberGate = __MT_MEMBER_GATE__;
 var port = process.env.__PREFIX___PORT;
 
 module.exports = buildApp;
+// bin/www hands the same gate to the flows router it starts (workflow.js).
+module.exports.memberGate = memberGate;
 
 function buildApp(extraRoutes) {
   return createApp(port, '__NAME___api', {

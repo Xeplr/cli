@@ -18,8 +18,8 @@ import { factory } from '../api/factory.js'
 //
 // ctx.screen says which screen is calling ("task_list" or "task_edit").
 // Keep them as methods (save(values, ctx) { … }) — super does not work in
-// arrow functions. Rules that must hold belong in the server's hooks
-// (api/screens/task/task.hooks.js).
+// arrow functions. Rules that must hold belong in a server function
+// (api/functions/), named in the screen's events.
 export class TaskHooks extends FactoryHooks {
   /** A list's rows (ctx.many), or the record Edit opens (ctx.id). */
   get(ctx) {
@@ -82,7 +82,7 @@ export default function EditTask({ record }) {
     factory.loadScreen('task_edit').then(setScreen, (e) => setError(e.message))
   }, [])
 
-  // The record as it is NOW, through the server's get hooks — not a copy the
+  // The record as it is NOW, through the server's events — not a copy the
   // list happened to have.
   useEffect(() => {
     if (record || !id || id === 'new') return

@@ -1,10 +1,10 @@
 // The model for task records — how values are shaped between your code and
 // the "tasks" table, like Sequelize's getters and setters.
 //
-// Register with @xeplr/factory:  factory.init({ knex, hooks, models: [require('./task.model')] })
+// Register with @xeplr/factory:  factory.init({ knex, models: [require('./task.model')] })
 //
 // Used everywhere: the screens' routes and factory.table('tasks'). Models shape
-// data; the hooks file decides behaviour.
+// data; the functions its events name decide behaviour (api/functions/).
 
 var { FactoryModel } = require('@xeplr/factory');
 

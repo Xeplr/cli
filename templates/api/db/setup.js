@@ -4,7 +4,7 @@
 var { getConnection } = require('@xeplr/db');
 __MT_DB_REGISTER__
 
-// No `|| '__NAME___api'` fallback. DB_API is required at startup
+// No `|| '__DB_API__'` fallback. DB_API is required at startup
 // (env.required.js), so a default could only ever fire in a process that
 // skipped that check — and silently connecting to a database nobody named is
 // exactly what the check exists to prevent.

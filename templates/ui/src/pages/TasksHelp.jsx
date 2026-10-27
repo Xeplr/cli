@@ -63,7 +63,7 @@ export default function TasksHelp() {
       <h3>Or without code</h3>
       <p>
         <strong>Configure UI → Forms → New form</strong>: label and key, design,
-        publish, add to menu — no code. The full steps for a form with its own page, hooks and
+        publish, add to menu — no code. The full steps for a form with its own page, functions and
         model are in <code>CLAUDE.md</code>, under "Create a new UI".
       </p>
 
@@ -75,7 +75,8 @@ export default function TasksHelp() {
       </p>
       <p>
         On the server — a check against other records, an email afterwards, a
-        list only managers see: <code>api/screens/task/task.hooks.js</code>.
+        list only managers see: a function in <code>api/functions/</code>, registered by the event it
+        is for and named in the screen’s events — Tasks names <code>tidyTaskTitle</code>.
       </p>
 
       <h3>Two things that catch people</h3>

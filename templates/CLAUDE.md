@@ -3,13 +3,13 @@
 An xeplr app: `api/` (Node, @xeplr/base-apis, sign-in by @xeplr/auth) and `ui/` (React + Vite, @xeplr/ui-account).
 Forms are **screens** made with @xeplr/ui-factory and served by @xeplr/factory. The sample is **Tasks**.
 
-Read `api/node_modules/@xeplr/ui-factory/AUTHORING.md` for what screens, hooks and models mean. This file says where they go in **this** app.
+Read `api/node_modules/@xeplr/ui-factory/AUTHORING.md` for what screens, functions, front-end hooks and models mean. This file says where they go in **this** app.
 
 ## Create a new UI
 
 A new UI is a **form**: a list, and an add / edit form it opens — on a page of its own (like Tasks) or in a popup — saved in its own table. Use the singular for `<form>` (`farming_department`), the plural for the page (`FarmingDepartments`).
 
-Create every file below — the hooks and the model run the defaults (`super`) until the request needs more.
+Create every file below — the front-end hooks and the model run the defaults (`super`) until the request needs more, and the server functions file registers nothing until it does.
 
 1. **The spec** — `api/screens/<form>/<form>.entity.json`: the name and the fields in reading order. Copy `api/screens/task/task.entity.json`; the format is "The entity spec" in AUTHORING.md. A dropdown on another form's table needs that form to exist first. **Use the ready-made fields** for email, phone, website, LinkedIn, age, date of birth, gender, country, amount, percentage, yes/no and postal code — `"type": "email"` and so on ("Choosing controls" in AUTHORING.md): they bring the keyboard, format check and options with them, so don't write those by hand.
 2. **Screens + server files** — from `api/`:
@@ -18,8 +18,8 @@ Create every file below — the hooks and the model run the defaults (`super`) u
    npx xeplr-factory validate screens/<form>/<form>-edit.screen.json
    npx xeplr-factory validate screens/<form>/<form>-list.screen.json
    ```
-   Writes `<form>-list.screen.json`, `<form>-edit.screen.json`, `<form>.hooks.js` (server hooks), `<form>.model.js` (server model).
-3. **Register them** in `api/screens/index.js`: both screens in `documents` (edit before list), `<form>_edit: require('./<form>/<form>.hooks')` in `hooks`, `require('./<form>/<form>.model')` in `models`.
+   Writes `<form>-list.screen.json`, `<form>-edit.screen.json`, `<form>.functions.js` (server functions, none registered yet), `<form>.model.js` (server model).
+3. **Register them** in `api/screens/index.js`: both screens in `documents` (edit before list), `require('./<form>/<form>.model')` in `models`; and in `api/functions/index.js`, `require('../screens/<form>/<form>.functions')`.
 4. **The form's page, with the front-end hooks** — `ui/src/pages/Edit<Form>.jsx`: copy `EditTask.jsx`; rename `TaskHooks` → `<Form>Hooks`, `taskHooks` → `<form>Hooks`, `'task_edit'` → `'<form>_edit'`. Keep every method calling `super`.
 5. **The list's page** — `ui/src/pages/<Forms>.jsx`: copy `Tasks.jsx`; load `'<form>_list'`, import `<form>Hooks` from `./Edit<Form>.jsx`, drop `TasksHelp`.
 6. **Route and side-rail item** — `ui/src/App.jsx`: import the list page, add `<Route path="/<forms>" element={<Forms />} />` next to `/tasks`, and a `drawerItems` entry `{ key: '<Forms>', icon, path: '/<forms>', clickHandler }` — by **key**, with an **icon** (a collapsed rail shows icons only) and the **path** (so the rail marks it as the current page). Never write the label in code.
@@ -33,11 +33,11 @@ Then change only what the request asks for:
 |---|---|
 | a field, label, rule, dropdown, layout, colour | the screen JSON → validate → publish in Configure UI → Forms (or, never published yet, restart the API) |
 | hide / filter rows on screen, an extra button on each row, fill in a value before saving, check something before Next moves on | front-end hooks — `ui/src/pages/Edit<Form>.jsx` (`get`, `save`, `delete`, `actions`, `step`) |
-| must / only if / check against / email when / only managers see | server hooks — `api/screens/<form>/<form>.hooks.js` |
+| must / only if / check against / email when / only managers see | a server function — registered in `api/screens/<form>/<form>.functions.js` with its `event`, then named in `<form>-edit.screen.json`'s `events` (or picked in Configure UI → Flows → Events). Register before naming: a screen naming an unregistered function is refused at publish |
 | store as / convert / comma-separated ↔ array / work out X from Y | server model — `api/screens/<form>/<form>.model.js` |
 | a query in your own server code | `factory.table('<forms table>')` — this company, active rows, the model applied |
 
-**Without code:** Super Admin can also make a form in **Configure UI → Forms** (settings menu, top right): New form (label + key) → design → Publish → Add to menu. It gets no page, hooks or model files; add them with the steps above when it needs them.
+**Without code:** Super Admin can also make a form in **Configure UI → Forms** (settings menu, top right): New form (label + key) → design → Publish → Add to menu. It gets no page, functions or model files; add them with the steps above when it needs them.
 
 ### The controls a field can be
 
@@ -49,6 +49,7 @@ Then change only what the request asks for:
 
 **A list opens its form on a page or in a popup** — `"openIn": "page"` in the entity spec, or Configure UI → Forms → the list. A page needs `onOpenRecord` on the list's page (where to navigate) and `onDone` on the form's page (where Save and Cancel go back to): `Tasks.jsx` and `EditTask.jsx` show both, with routes `/tasks/new` and `/tasks/:id` in `App.jsx`.
 
+__WF_CLAUDE__
 **Keys and labels.** A form's key names its screens and table and never changes once published; its label is the screens' name. A menu item's key (`menus.name`) is what `drawerItems` matches; its label is what the rail shows, renamed in Configure UI → Menu. Code only ever uses keys.
 
 ### The prompt
@@ -64,7 +65,7 @@ Replace the bold parts. Add behaviour in the same message if you want it — "a 
 - A published screen's design lives in the **database**. Editing its `.screen.json` changes nothing afterwards: publish the change in Configure UI → Forms.
 - Every data address is under `/api` (a page and a data path must never collide). New routes go in `api/routes/index.js`, and `ui/vite.config.js` must proxy their prefix.
 - Designing and publishing are **Super Admin only** (`api/routes/access.js`); every other route checks the permission catalog.
-- The browser is not a security boundary: anything that must hold goes in server hooks.
+- The browser is not a security boundary: anything that must hold goes in a server function, named in the screen's events.
 - Hooks and models are **methods** calling `super` — never arrow-function properties.
 - `authFetch` returns the parsed body, not a Response.
 - Sign-up needs email and `AUTH_REGISTER_ROLES` (the role a new account gets, in `api/development.env`); without either, registration is refused on purpose — never work around it by activating accounts or granting roles in SQL. An admin can activate an account from the User Roles screen.
