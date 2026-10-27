@@ -26,7 +26,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.0",
     "multer": "^2.0.2",
-    "nodemailer": "^10.0.2"
+    "nodemailer": "^10.0.2",
     "@xeplr/actions": "^1.4.0",
     "@xeplr/workflow-api": "^1.1.0"
   },
