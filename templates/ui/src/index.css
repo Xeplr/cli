@@ -10,6 +10,11 @@
   --app-rail-width: 48px;
 }
 
+/* ON A PHONE (below 640px) the rail becomes a bar across the top — see
+   @xeplr/ui-account's nav.css — so the page gives up its top instead of its
+   left: --xeplr-nav-bar-height, set by that stylesheet. The rest of this
+   file's phone rules are at the bottom. */
+
 body { margin: 0; }
 
 .app {
@@ -374,3 +379,29 @@ body { margin: 0; }
 .app-connect-steps li { margin-bottom: 14px; }
 .app-connect code { font-size: 12.5px; padding: 1px 5px; border-radius: 4px; background: var(--xeplr-bg-secondary); border: 1px solid var(--xeplr-border-primary); }
 .app-connect pre { margin: 6px 0 0; font-size: 12.5px; }
+
+/* ── on a phone ──────────────────────────────────────────────────────────
+   Forms and lists made in the designer stack themselves (@xeplr/ui-factory),
+   and @xeplr/ui-table keeps its own rows reachable. What is left is this
+   app's own chrome: room for the top bar instead of the rail, tighter page
+   padding, fields one per row, tables that scroll inside their own box
+   rather than widening the page, and buttons a thumb can hit. */
+@media (max-width: 640px) {
+  .app { padding-left: 0; padding-top: var(--xeplr-nav-bar-height, 52px); }
+  .main { padding: 16px 12px; }
+  .app-page h1 { font-size: 22px; }
+  .app-welcome h1 { font-size: 24px; }
+
+  .app-field-row { flex-direction: column; gap: 0; }
+  .app-field input, .app-field textarea, .app-field select { font-size: 16px; min-height: 44px; }
+  .app-forms-field { min-width: 0; flex-basis: 100%; }
+  .app-menu-label, .app-forms-new input { font-size: 16px; min-height: 44px; box-sizing: border-box; }
+  .app-btn { min-height: 44px; }
+  .app-row-actions .app-btn { min-height: 40px; padding: 8px 12px; }
+
+  .app-table { display: block; overflow-x: auto; }
+  .app-tabs { overflow-x: auto; }
+  .app-tab { white-space: nowrap; min-height: 44px; }
+  .app-help { padding: 16px; }
+  .app-connect { padding: 16px; }
+}
