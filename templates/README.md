@@ -83,5 +83,7 @@ __WF_README__
 | Designing and publishing forms is **Super Admin only**. | Publishing changes database tables. |
 | Rules that must hold go in **server functions** (`api/functions/`), named in a screen's events; the browser only shapes what people see and send. | The browser is not a security boundary. |
 | Every data address is under **`/api`**. | A page and a data path must never collide. |
+| A screen is a **document**; a button is a **registered function and its parameters**; a page written by hand is **web only**, listed in `ui/pages.json` with the reason. | What is a document can be drawn anywhere — a phone app too. The pre-commit hook and Configure UI → Menu say which pages are not. |
+| Every file the app keeps is under **`XEPLR_DATA_DIR`**, a folder per company. | One place to back up, and no company reads another's files. |
 
 The full list, and where each piece lives, is in `CLAUDE.md`.
