@@ -40,6 +40,11 @@ require('../functions');
 var screens = require('../screens');
 
 async function start() {
+  // WHICH PRODUCT THIS IS, for every file it keeps: each company's files live
+  // in <XEPLR_DATA_DIR>/__NAME__/<company>/… and nowhere else. Fixed here, at
+  // boot — never from a request.
+  require('@xeplr/db').registerApplication('__NAME__');
+
   // Name the connection before anything uses it — the migrator resolves by
   // name from a registry that getConnection does not populate.
   await resolveConfig('api', process.env.__PREFIX___CONNECTION);
@@ -63,14 +68,14 @@ async function start() {
   var knex = await require('../db/setup');
 
   // The screens and their models. A malformed model stops startup here,
-  // rather than silently never running.
-  // filesDir: where a form's file field puts what people upload. Nothing is
-  // served from it — a file comes back only through the factory's own route,
-  // which checks the caller the way reading a record does.
+  // rather than silently never running. What people attach through a form's
+  // file field goes in the tenant's own folder under XEPLR_DATA_DIR
+  // (screens/); nothing is served from it — a file comes back only through
+  // the factory's own route, which checks the caller the way reading a record
+  // does.
   await factory.init({
     knex: knex,
-    models: screens.models,
-    filesDir: process.env.FACTORY_FILES_DIR
+    models: screens.models
   });
 
   // Screens never published yet are published now, creating their tables.

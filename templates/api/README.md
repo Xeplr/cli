@@ -27,7 +27,7 @@ The API (`@xeplr/base-apis`) and the sign-in service (`@xeplr/auth`), with this 
 | `screens/` | the forms this app ships with: per form, its spec, list and edit screens, server functions and model — registered in `screens/index.js` |
 | `functions/` | this app's functions — the code screens' events and flows' `decide` pick by name — registered with `@xeplr/actions` by event, loaded at startup |
 | `workflow.js` | flows: `@xeplr/workflow-api` started inside this API, in its own database (`DB_WORKFLOW`) |
-| `uploads/` | what people attach through a form's **file** field (`FACTORY_FILES_DIR`). Never committed, and never served: a file comes back only through the API's own route, which checks the caller the way reading a record does |
+| `data/` | `XEPLR_DATA_DIR` in development: every file the app keeps, a folder per company — what people attach through a form's **file** field is in `<company>/screens/`. Never committed, and never served: a file comes back only through the API's own route, which checks the caller the way reading a record does |
 | `migrations/` | hand-written SQL for tables no form owns |
 | `migrations-auth/` | this app's rows in the sign-in database — menus (by key), permissions |
 | `models/` | models for hand-written tables |
@@ -37,6 +37,7 @@ The API (`@xeplr/base-apis`) and the sign-in service (`@xeplr/auth`), with this 
 | Setting | |
 |---|---|
 | `REDIS_PREFIX` | **required, unique to this app** (`__NAME__:`) |
+| `XEPLR_DATA_DIR` | **required, absolute, existing**: where every file the app keeps lives, a folder per company (`<root>/__NAME__/<company>/…`). Generated as `api/data`; on a server, somewhere backed up |
 | `__PREFIX___CONNECTION`, `AUTH_DB_CONNECTION_INFO_ENCRYPTED` | the database, encrypted — `npm run db:encrypt` |
 | `DB_API`, `AUTH_DB_NAME` | the two database names — never guessed |
 | `AUTH_SUPER_ADMIN_EMAIL` / `_PASSWORD` | the first account — created once, when the sign-in database is first set up |

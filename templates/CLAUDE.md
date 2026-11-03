@@ -5,6 +5,8 @@ Forms are **screens** made with @xeplr/ui-factory and served by @xeplr/factory. 
 
 Read `api/node_modules/@xeplr/ui-factory/AUTHORING.md` for what screens, functions, front-end hooks and models mean. This file says where they go in **this** app.
 
+**Before changing any screen or button, read the "Screens and buttons — the rules" section of `ui/node_modules/@xeplr/ui-factory/README.md` and follow it.** In short: a screen is a document; a button is a registered function and its parameters; a page written by hand is web only, listed in `ui/pages.json` with the reason — and before writing one, say so and ask whether to add the missing control to the factory instead.
+
 ## Create a new UI
 
 A new UI is a **form**: a list, and an add / edit form it opens — on a page of its own (like Tasks) or in a popup — saved in its own table. Use the singular for `<form>` (`farming_department`), the plural for the page (`FarmingDepartments`).
@@ -32,7 +34,9 @@ Then change only what the request asks for:
 | the request says… | change |
 |---|---|
 | a field, label, rule, dropdown, layout, colour | the screen JSON → validate → publish in Configure UI → Forms (or, never published yet, restart the API) |
-| hide / filter rows on screen, an extra button on each row, fill in a value before saving, check something before Next moves on | front-end hooks — `ui/src/pages/Edit<Form>.jsx` (`get`, `save`, `delete`, `actions`, `step`) |
+| a button that does something to a record — set a status, confirm, approve | a **Buttons** control in the screen JSON naming a server function (`event: 'button'`, with an `inputSchema` — `options` for the values allowed) and its `params`; the function in `<form>.functions.js`. Several buttons that differ only by a value are ONE function |
+| a list whose rows are worked out, a search box, filter chips with counts | a list with `rowsFrom` naming a server function (`event: 'listRows'`) that returns `{ rows, counts }` — it writes the text the list shows |
+| hide / filter rows on screen, fill in a value before saving, check something before Next moves on | front-end hooks — `ui/src/pages/Edit<Form>.jsx` (`get`, `save`, `delete`, `step`). Browser only: say so if it matters on a phone |
 | must / only if / check against / email when / only managers see | a server function — registered in `api/screens/<form>/<form>.functions.js` with its `event`, then named in `<form>-edit.screen.json`'s `events` (or picked in Configure UI → Flows → Events). Register before naming: a screen naming an unregistered function is refused at publish |
 | store as / convert / comma-separated ↔ array / work out X from Y | server model — `api/screens/<form>/<form>.model.js` |
 | a query in your own server code | `factory.table('<forms table>')` — this company, active rows, the model applied |
@@ -44,7 +48,7 @@ Then change only what the request asks for:
 `text` (default), `textarea`, `number`, `date`, `datetime`, `checkbox`, `dropdown`, `radio`, `multiselect`, `file`, plus `stepper` and `label`. The sample uses every one — read `api/screens/task/task.entity.json` for how each is written. Three are worth knowing about:
 
 - **`multiselect`** — several ids in ONE text column, comma separated, and an array in your code. An option's id may not contain a comma.
-- **`file`** — the column holds the **path**, never the file. Say which extensions (`"accept": ".pdf,.docx"`) and how large (`"maxSize": 10`, in MB); the API enforces both, by extension, and keeps the file under `FACTORY_FILES_DIR`. Uploading needs `multer` in `api/` (already in package.json).
+- **`file`** — the column holds the **path**, never the file. Say which extensions (`"accept": ".pdf,.docx"`) and how large (`"maxSize": 10`, in MB); the API enforces both, by extension, and keeps the file in the company's own folder under `XEPLR_DATA_DIR` (`screens/<table>/`). Uploading needs `multer` in `api/` (already in package.json).
 - **`stepper`** — a journey across the top. Every other field says which step it is on (`"step": "Planning"`), and one without a `step` shows on every step. `step(ctx)` in the front-end hooks runs before each move: return `false` to stay, a step's key to go there, `ctx.disable(['planning'])` to rule steps out (struck through on the bar, passed over by Next and Back) and `ctx.enable()` to bring them back.
 
 **A list opens its form on a page or in a popup** — `"openIn": "page"` in the entity spec, or Configure UI → Forms → the list. A page needs `onOpenRecord` on the list's page (where to navigate) and `onDone` on the form's page (where Save and Cancel go back to): `Tasks.jsx` and `EditTask.jsx` show both, with routes `/tasks/new` and `/tasks/:id` in `App.jsx`.
@@ -69,4 +73,6 @@ Replace the bold parts. Add behaviour in the same message if you want it — "a 
 - Hooks and models are **methods** calling `super` — never arrow-function properties.
 - `authFetch` returns the parsed body, not a Response.
 - **Every page works on a phone.** Forms and lists from the designer stack themselves below 640px; a page written by hand puts its phone rules in the `@media (max-width: 640px)` block at the bottom of `ui/src/index.css` — inputs 16px or larger, buttons 44px tall, tables scrolling inside their own box, no fixed width wider than the screen. Do not design a second, phone-only screen.
+- **Every page is in `ui/pages.json`:** under `documents` when it is drawn from screens, under `webOnly` with the reason when it is written by hand. The pre-commit hook (`.githooks/pre-commit`, installed by `npm install` in `ui/`) warns about every web-only page and every route not listed; Configure UI → Menu tags those items "Web only". It never blocks — it makes sure nobody is surprised that a page is missing from a phone app.
+- **Every file the app keeps is under `XEPLR_DATA_DIR`**, in the company's own folder — never a folder of your own choosing, never a relative path.
 - Sign-up needs email and `AUTH_REGISTER_ROLES` (the role a new account gets, in `api/development.env`); without either, registration is refused on purpose — never work around it by activating accounts or granting roles in SQL. An admin can activate an account from the User Roles screen.

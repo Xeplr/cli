@@ -5,7 +5,13 @@
 // Saved for everyone at once; your own rail updates straight away.
 import { useCallback, useEffect, useState } from 'react'
 import { listMenuItems, saveMenuItems, useAccess } from '@xeplr/ui-account'
+import { webOnlyMenus } from '@xeplr/ui-factory'
 import { APP_MENU_KEYS, FORM_MENU_PREFIX } from '../menu.js'
+import pages from '../../pages.json'
+
+// Items whose page is hand-written for the browser (ui/pages.json "webOnly"):
+// tagged, so whoever arranges the menu knows they will not be in a phone app.
+const WEB_ONLY = webOnlyMenus(pages)
 
 // The app's own items (ui/src/menu.js) and forms added to the menu. The rest —
 // sign-in's pages (Login, Register …) and admin screens — only with "Show all".
@@ -80,7 +86,10 @@ export default function MenuSettings() {
                 <td>
                   <input className="app-menu-label" value={it.label} placeholder={it.name} aria-label={'Label for ' + it.name} onChange={(e) => change(it.name, { label: e.target.value })} />
                 </td>
-                <td><code>{it.name}</code></td>
+                <td>
+                  <code>{it.name}</code>
+                  {WEB_ONLY[it.name] && <span className="app-web-only" title={WEB_ONLY[it.name]}>Web only</span>}
+                </td>
                 <td>
                   <label className="app-menu-shown">
                     <input type="checkbox" checked={!it.isHidden} onChange={(e) => change(it.name, { isHidden: !e.target.checked })} /> Shown

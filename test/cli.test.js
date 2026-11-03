@@ -387,13 +387,14 @@ test('every app has flows, run by @xeplr/workflow-api inside the API, in a datab
   ['api/routes/flows.js', 'api/workflow.js', 'api/functions/index.js', 'ui/src/api/flows.js', 'ui/src/pages/Flows.jsx', 'ui/src/pages/FlowsHome.jsx', 'ui/src/pages/FlowDesigner.jsx', 'ui/src/pages/Journey.jsx'].forEach(function (rel) {
     assert.ok(result.written.indexOf(rel) !== -1, rel + ' is written');
   });
-  // The free, public packages — 1.1 is where a flow's arrow can let a
-  // function decide; factory 2 is where a screen's events are functions
-  // picked by name. The paid designer (@xeplr/ui-workflow) is not here.
+  // The free, public packages — workflow-api 2, actions 2 and factory 3 keep
+  // every file in the company's own folder under XEPLR_DATA_DIR; factory 3.0.1
+  // is where buttons and function-fed lists run. The paid designer
+  // (@xeplr/ui-workflow) is not here.
   var apiPkg = read('api/package.json');
-  assert.match(apiPkg, /"@xeplr\/workflow-api": "\^1\.1\.0"/);
-  assert.match(apiPkg, /"@xeplr\/factory": "\^2\.0\.0"/);
-  assert.match(apiPkg, /"@xeplr\/actions": "\^1\.4\.0"/);
+  assert.match(apiPkg, /"@xeplr\/workflow-api": "\^2\.1\.0"/);
+  assert.match(apiPkg, /"@xeplr\/factory": "\^3\.0\.1"/);
+  assert.match(apiPkg, /"@xeplr\/actions": "\^2\.2\.0"/);
   assert.doesNotMatch(apiPkg, /"@xeplr\/workflow"/, 'not the old private package');
   assert.doesNotMatch(read('ui/package.json'), /ui-workflow/, 'not the paid designer');
 
@@ -436,8 +437,8 @@ test('every app has flows, run by @xeplr/workflow-api inside the API, in a datab
   assert.match(designer, /<FlowDesignerPage factory=\{factory\} flows=\{flows\} flowKey=\{flow\} urlKey="flow" \/>/);
   // The API validates a screen with @xeplr/ui-factory/model, so ITS copy must
   // never be older than the browser's.
-  assert.match(apiPkg, /"@xeplr\/ui-factory": "\^1\.8\.3"/);
-  assert.match(read('ui/package.json'), /"@xeplr\/ui-factory": "\^1\.8\.3"/);
+  assert.match(apiPkg, /"@xeplr\/ui-factory": "\^1\.8\.4"/);
+  assert.match(read('ui/package.json'), /"@xeplr\/ui-factory": "\^1\.8\.4"/);
   assert.match(read('ui/vite.config.js'), /host: '127\.0\.0\.1'/, 'reachable on 127.0.0.1, not ::1 alone');
 
   // The generated app must not carry a hand-rolled version of any of it. An
@@ -594,15 +595,23 @@ test('the sample form uses every control, over steps, and opens on a page of its
   assert.match(app, /path="\/tasks\/new"/);
   assert.match(app, /path="\/tasks\/:id"/);
 
-  // Uploads: somewhere to put them, multer to receive them, and never committed.
-  assert.match(fs.readFileSync(path.join(dir, 'api/development.env'), 'utf8'), /FACTORY_FILES_DIR=/);
+  // Files: one data root, absolute and already there (the API refuses one
+  // that is not), multer to receive uploads, and never committed.
+  var env = fs.readFileSync(path.join(dir, 'api/development.env'), 'utf8');
+  var root = (env.match(/^XEPLR_DATA_DIR=(.*)$/m) || [])[1];
+  assert.ok(root && path.isAbsolute(root) && fs.statSync(root).isDirectory(), 'XEPLR_DATA_DIR is absolute and exists: ' + root);
+  assert.strictEqual(root, path.join(path.resolve(dir), 'api', 'data'));
+  assert.doesNotMatch(env, /FACTORY_FILES_DIR/);
+  assert.match(fs.readFileSync(path.join(dir, 'api/env.required.js'), 'utf8'), /require\('@xeplr\/actions'\)\.requiredEnv/);
   // Sign-up refuses without these; a fresh app must ship them set.
   var signupEnv = fs.readFileSync(path.join(dir, 'api/development.env'), 'utf8');
   assert.match(signupEnv, /^AUTH_RESET_URL=http:\/\/localhost:\d+\/auth\/reset-password$/m);
   assert.match(signupEnv, /^AUTH_REGISTER_ROLES=Viewer$/m);
-  assert.match(fs.readFileSync(path.join(dir, 'api/bin/www'), 'utf8'), /filesDir: process\.env\.FACTORY_FILES_DIR/);
+  var bootFile = fs.readFileSync(path.join(dir, 'api/bin/www'), 'utf8');
+  assert.match(bootFile, /registerApplication\('demo'\)/);
+  assert.doesNotMatch(bootFile, /filesDir/);
   assert.match(fs.readFileSync(path.join(dir, 'api/package.json'), 'utf8'), /"multer"/);
-  assert.match(fs.readFileSync(path.join(dir, 'api/.gitignore'), 'utf8'), /uploads\//);
+  assert.match(fs.readFileSync(path.join(dir, 'api/.gitignore'), 'utf8'), /^data\/$/m);
 });
 
 test('a new UI is described for Claude: CLAUDE.md with the recipe and the prompt, and the task model is wired in', function () {
@@ -656,4 +665,41 @@ test('an occupied folder is refused before any question is asked', function () {
   assert.strictEqual(run.status, 1);
   assert.match(run.stderr, /already exists and is not empty/);
   assert.doesNotMatch(run.stdout, /Port decade/, 'no question was asked');
+});
+
+test('every page is listed: documents, or web only with the reason — and a commit says which', function () {
+  var dir = path.join(tmpdir(), 'demo-pages');
+  var result = generate.generate(answers(), dir);
+  var pages = JSON.parse(fs.readFileSync(path.join(dir, 'ui/pages.json'), 'utf8'));
+  var app = fs.readFileSync(path.join(dir, 'ui/src/App.jsx'), 'utf8');
+  var routes = [];
+  app.replace(/<Route\b[^>]*?\bpath="([^"]+)"[^>]*>/g, function (m, p) { if (p !== '*' && !/<Navigate/.test(m)) routes.push(p); });
+  var listed = pages.documents.map(function (p) { return p.path; }).concat(pages.webOnly.map(function (p) { return p.path; }));
+  assert.deepStrictEqual(routes.filter(function (r) { return listed.indexOf(r) === -1; }), [], 'every route of App.jsx is in pages.json');
+  assert.ok(pages.webOnly.every(function (p) { return p.reason; }), 'every web-only page says why');
+  assert.ok(pages.documents.some(function (p) { return p.path === '/tasks'; }), 'the sample is drawn from documents');
+  // The hook warns and never blocks; npm install in ui/ points git at it.
+  var hook = fs.readFileSync(path.join(dir, '.githooks/pre-commit'), 'utf8');
+  assert.match(hook, /xeplr-factory pages ui/);
+  assert.match(hook, /exit 0\s*$/);
+  if (process.platform !== 'win32') assert.ok(fs.statSync(path.join(dir, '.githooks/pre-commit')).mode & 0o100, 'the hook can run');
+  assert.ok(result.written.indexOf(path.join('.githooks', 'pre-commit')) !== -1);
+  var uiPkg = JSON.parse(fs.readFileSync(path.join(dir, 'ui/package.json'), 'utf8'));
+  assert.match(uiPkg.scripts.prepare, /core\.hooksPath \.githooks/);
+  assert.match(uiPkg.scripts.prepare, /\|\| true$/, 'a checkout that is not a git repo still installs');
+  // Configure UI → Menu tags them.
+  var menu = fs.readFileSync(path.join(dir, 'ui/src/pages/MenuSettings.jsx'), 'utf8');
+  assert.match(menu, /webOnlyMenus\(pages\)/);
+  assert.match(menu, /Web only/);
+  // And Claude is told where the rules are.
+  assert.match(fs.readFileSync(path.join(dir, 'CLAUDE.md'), 'utf8'), /"Screens and buttons — the rules" section of `ui\/node_modules\/@xeplr\/ui-factory\/README\.md`/);
+});
+
+test('with tenancy, the company picker is listed as web only and the JSON stays valid', function () {
+  var dir = path.join(tmpdir(), 'demo-pages-mt');
+  var a = answers();
+  a.tenancy = [{ key: 'l1', name: 'companyId', header: 'x-company-id', label: 'Company' }];
+  generate.generate(a, dir);
+  var pages = JSON.parse(fs.readFileSync(path.join(dir, 'ui/pages.json'), 'utf8'));
+  assert.ok(pages.webOnly.some(function (p) { return p.path === '/select' && p.menu === 'Switch company'; }));
 });

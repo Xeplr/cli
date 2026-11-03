@@ -14,6 +14,10 @@ module.exports = [
   // AUTH_ACTIVATION_URL, AUTH_RESET_URL
   ...require('@xeplr/auth').requiredEnv,
 
+  // XEPLR_DATA_DIR — the one folder every file this app keeps lives under,
+  // a folder per company inside it. Absolute, and never defaulted.
+  ...require('@xeplr/actions').requiredEnv,
+
   // ── this app's own ──
   '__PREFIX___PORT',
 

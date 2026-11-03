@@ -76,11 +76,14 @@ AUTH_RESET_URL=http://localhost:__UI_PORT__/auth/reset-password
 # more than one; Super Admin is never allowed here.
 AUTH_REGISTER_ROLES=Viewer
 
-# ── Uploaded files ──
-# Where a form's FILE field puts what people upload. The path is what the
-# record stores; the file itself is served only through the API's own route,
-# which checks the caller the way reading a record does. Relative to api/.
-FACTORY_FILES_DIR=./uploads/factory
+# ── Where this app's files live ──
+# Everything the app keeps on disk — what people attach through a form's FILE
+# field, files a flow reads or writes — is under this one folder, a folder per
+# company inside it: <XEPLR_DATA_DIR>/__NAME__/<company>/screens/… The record
+# stores a path inside that folder; the file is served only through the API's
+# own route, which checks the caller the way reading a record does.
+# ABSOLUTE, and it must exist: a wrong folder would read as empty data.
+XEPLR_DATA_DIR=__DATA_DIR__
 
 # ── Email ──
 # Needed for anyone but the super admin to get in: registration, resending an
