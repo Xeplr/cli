@@ -26,4 +26,5 @@ npm run build     # → dist/
 - `authFetch` returns the **parsed body**, not a Response — no `.json()`.
 - A side-rail item needs an **icon** (a collapsed rail shows icons only) and its key must exist as a menu row, or it is dropped silently. Give it its **`path`** too: that is how the rail marks the page you are on.
 - The rail is 48px when collapsed; `--app-rail-width` in `src/index.css` reserves the same space and must match it.
+- **Phones work without extra code.** Below 640px the rail becomes a bar across the top (`@xeplr/ui-account`) and `src/index.css` gives the page's top to it instead of its left (`--xeplr-nav-bar-height`). Forms and lists made in the designer stack themselves (`@xeplr/ui-factory`); tables keep scrolling sideways with their row buttons pinned on screen (`@xeplr/ui-table`). A page you write by hand follows the same rules in the phone block at the bottom of `src/index.css`: inputs 16px or larger (or iOS zooms the page), buttons 44px tall, tables that scroll inside their own box, nothing a fixed width wider than the screen.
 - Set page backgrounds on a container inside the theme, never on `body`.

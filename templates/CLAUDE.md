@@ -68,4 +68,5 @@ Replace the bold parts. Add behaviour in the same message if you want it — "a 
 - The browser is not a security boundary: anything that must hold goes in a server function, named in the screen's events.
 - Hooks and models are **methods** calling `super` — never arrow-function properties.
 - `authFetch` returns the parsed body, not a Response.
+- **Every page works on a phone.** Forms and lists from the designer stack themselves below 640px; a page written by hand puts its phone rules in the `@media (max-width: 640px)` block at the bottom of `ui/src/index.css` — inputs 16px or larger, buttons 44px tall, tables scrolling inside their own box, no fixed width wider than the screen. Do not design a second, phone-only screen.
 - Sign-up needs email and `AUTH_REGISTER_ROLES` (the role a new account gets, in `api/development.env`); without either, registration is refused on purpose — never work around it by activating accounts or granting roles in SQL. An admin can activate an account from the User Roles screen.

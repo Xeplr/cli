@@ -436,8 +436,8 @@ test('every app has flows, run by @xeplr/workflow-api inside the API, in a datab
   assert.match(designer, /<FlowDesignerPage factory=\{factory\} flows=\{flows\} flowKey=\{flow\} urlKey="flow" \/>/);
   // The API validates a screen with @xeplr/ui-factory/model, so ITS copy must
   // never be older than the browser's.
-  assert.match(apiPkg, /"@xeplr\/ui-factory": "\^1\.7\.1"/);
-  assert.match(read('ui/package.json'), /"@xeplr\/ui-factory": "\^1\.7\.1"/);
+  assert.match(apiPkg, /"@xeplr\/ui-factory": "\^1\.8\.3"/);
+  assert.match(read('ui/package.json'), /"@xeplr\/ui-factory": "\^1\.8\.3"/);
   assert.match(read('ui/vite.config.js'), /host: '127\.0\.0\.1'/, 'reachable on 127.0.0.1, not ::1 alone');
 
   // The generated app must not carry a hand-rolled version of any of it. An
