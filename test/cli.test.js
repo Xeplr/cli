@@ -393,7 +393,7 @@ test('every app has flows, run by @xeplr/workflow-api inside the API, in a datab
   // (@xeplr/ui-workflow) is not here.
   var apiPkg = read('api/package.json');
   assert.match(apiPkg, /"@xeplr\/workflow-api": "\^2\.1\.0"/);
-  assert.match(apiPkg, /"@xeplr\/factory": "\^3\.0\.1"/);
+  assert.match(apiPkg, /"@xeplr\/factory": "\^3\.0\.2"/);
   assert.match(apiPkg, /"@xeplr\/actions": "\^2\.2\.0"/);
   assert.doesNotMatch(apiPkg, /"@xeplr\/workflow"/, 'not the old private package');
   assert.doesNotMatch(read('ui/package.json'), /ui-workflow/, 'not the paid designer');
@@ -437,8 +437,8 @@ test('every app has flows, run by @xeplr/workflow-api inside the API, in a datab
   assert.match(designer, /<FlowDesignerPage factory=\{factory\} flows=\{flows\} flowKey=\{flow\} urlKey="flow" \/>/);
   // The API validates a screen with @xeplr/ui-factory/model, so ITS copy must
   // never be older than the browser's.
-  assert.match(apiPkg, /"@xeplr\/ui-factory": "\^1\.8\.4"/);
-  assert.match(read('ui/package.json'), /"@xeplr\/ui-factory": "\^1\.8\.4"/);
+  assert.match(apiPkg, /"@xeplr\/ui-factory": "\^1\.8\.6"/);
+  assert.match(read('ui/package.json'), /"@xeplr\/ui-factory": "\^1\.8\.6"/);
   assert.match(read('ui/vite.config.js'), /host: '127\.0\.0\.1'/, 'reachable on 127.0.0.1, not ::1 alone');
 
   // The generated app must not carry a hand-rolled version of any of it. An
