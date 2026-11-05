@@ -3,8 +3,9 @@
 //
 // authFetch attaches the signed-in user's token (and the active company, when
 // the app has tenancy) and returns the PARSED body. createFactoryApi accepts
-// it as it is.
-import { authFetch } from '@xeplr/ui-account'
+// it as it is. authFetchFile is the same request returning the file's bytes:
+// how a form's stored pictures show as thumbnails.
+import { authFetch, authFetchFile } from '@xeplr/ui-account'
 import { createFactoryApi } from '@xeplr/ui-factory'
 
-export const factory = createFactoryApi({ fetch: authFetch, base: '/api' })
+export const factory = createFactoryApi({ fetch: authFetch, fetchFile: authFetchFile, base: '/api' })
