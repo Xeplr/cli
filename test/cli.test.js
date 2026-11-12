@@ -28,6 +28,21 @@ function answers(extra) {
 
 // ── placeholder substitution ────────────────────────────────────────────────
 
+/**
+ * A generated package.json depends on `name` at `^min` or newer, in the same
+ * major — what a test means by "the version that has X". An exact string
+ * broke every time a minimum was raised.
+ */
+function atLeast(pkgText, name, min) {
+  var range = JSON.parse(pkgText).dependencies[name] || '';
+  var m = /^\^(\d+)\.(\d+)\.(\d+)$/.exec(range);
+  assert.ok(m, name + ' is a ^ range: "' + range + '"');
+  var have = m.slice(1).map(Number);
+  var need = min.split('.').map(Number);
+  assert.equal(have[0], need[0], name + ' stays on major ' + need[0]);
+  assert.ok(have[1] > need[1] || (have[1] === need[1] && have[2] >= need[2]), name + ' is at least ' + min + ': ' + range);
+}
+
 test('__PREFIX___PORT keeps the underscore that belongs to _PORT', function () {
   // A greedy match took `__PREFIX___` here, swallowing the underscore in
   // front of PORT and then complaining about a token nobody wrote.
@@ -392,9 +407,10 @@ test('every app has flows, run by @xeplr/workflow-api inside the API, in a datab
   // is where buttons and function-fed lists run. The paid designer
   // (@xeplr/ui-workflow) is not here.
   var apiPkg = read('api/package.json');
-  assert.match(apiPkg, /"@xeplr\/workflow-api": "\^2\.1\.0"/);
-  assert.match(apiPkg, /"@xeplr\/factory": "\^3\.0\.2"/);
-  assert.match(apiPkg, /"@xeplr\/actions": "\^2\.2\.0"/);
+  // At least these, within the same major: a newer minimum is fine.
+  atLeast(apiPkg, '@xeplr/workflow-api', '2.1.0');
+  atLeast(apiPkg, '@xeplr/factory', '3.0.2');
+  atLeast(apiPkg, '@xeplr/actions', '2.2.0');
   assert.doesNotMatch(apiPkg, /"@xeplr\/workflow"/, 'not the old private package');
   assert.doesNotMatch(read('ui/package.json'), /ui-workflow/, 'not the paid designer');
 
@@ -437,8 +453,8 @@ test('every app has flows, run by @xeplr/workflow-api inside the API, in a datab
   assert.match(designer, /<FlowDesignerPage factory=\{factory\} flows=\{flows\} flowKey=\{flow\} urlKey="flow" \/>/);
   // The API validates a screen with @xeplr/ui-factory/model, so ITS copy must
   // never be older than the browser's.
-  assert.match(apiPkg, /"@xeplr\/ui-factory": "\^1\.8\.6"/);
-  assert.match(read('ui/package.json'), /"@xeplr\/ui-factory": "\^1\.8\.6"/);
+  atLeast(apiPkg, '@xeplr/ui-factory', '1.8.6');
+  atLeast(read('ui/package.json'), '@xeplr/ui-factory', '1.8.6');
   assert.match(read('ui/vite.config.js'), /host: '127\.0\.0\.1'/, 'reachable on 127.0.0.1, not ::1 alone');
 
   // The generated app must not carry a hand-rolled version of any of it. An
