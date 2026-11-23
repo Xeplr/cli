@@ -101,8 +101,8 @@ export default function Masters() {
                 <td className="app-row-actions">
                   {/* Its records: the list screen is what looking at a master
                       means. Its design is where the flag was set. */}
-                  <Link to={`/forms/${m.key}`}>Open</Link>
-                  <Link to={`/configure/forms/${m.key}/design/form`}>Design</Link>
+                  <Link className="app-btn app-btn-quiet" to={`/forms/${m.key}`}>Open</Link>
+                  <Link className="app-btn app-btn-quiet" to={`/configure/forms/${m.key}/design/form`}>Design</Link>
                 </td>
               </tr>
             ))}
