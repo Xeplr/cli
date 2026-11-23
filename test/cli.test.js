@@ -741,3 +741,11 @@ test('BUILDING.md maps every step — click or code — and names every function
   assert.match(read('README.md'), /\[`BUILDING\.md`\]\(BUILDING\.md\)/);
   assert.match(read('CLAUDE.md'), /`BUILDING\.md` is the whole map for people/);
 });
+
+test('the form designer hands the builder both screens WITH their documents, so a list can offer the form\'s fields as columns', function () {
+  var dir = path.join(tmpdir(), 'demo');
+  generate.generate(answers(), dir);
+  var src = fs.readFileSync(path.join(dir, 'ui/src/pages/FormDesigner.jsx'), 'utf8');
+  assert.match(src, /factory\.loadDraft\(form \+ p\.suffix\)/);
+  assert.match(src, /document: documents\[p\.part\]/);
+});

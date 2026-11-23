@@ -20,6 +20,18 @@ export default function FormDesigner() {
   const screenKey = form + (part === 'list' ? '_list' : '_edit')
   const [current, setCurrent] = useState(null)      // { key, document, lockedNames }
   const [error, setError] = useState(null)
+  // BOTH SCREENS' DOCUMENTS, not just their names. The list's Columns are
+  // the FORM's fields, and its "Edit in" opens the form: without the form's
+  // document the list can offer only the columns it already has, so a field
+  // added to the form could never be shown in its list.
+  const [documents, setDocuments] = useState({})
+
+  useEffect(() => {
+    let cancelled = false
+    Promise.all(PARTS.map((p) => factory.loadDraft(form + p.suffix).then((row) => [p.part, row.document], () => [p.part, null])))
+      .then((pairs) => { if (!cancelled) setDocuments(Object.fromEntries(pairs)) })
+    return () => { cancelled = true }
+  }, [form, part])
 
   useEffect(() => {
     let cancelled = false
@@ -65,7 +77,7 @@ export default function FormDesigner() {
             document={current.document}
             lockedNames={current.lockedNames}
             onPublish={publish}
-            screens={PARTS.map((p) => ({ id: form + p.suffix, name: p.label }))}
+            screens={PARTS.map((p) => ({ id: form + p.suffix, name: p.label, document: documents[p.part] || undefined }))}
           />
         </div>
       )}
