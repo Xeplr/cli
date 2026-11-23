@@ -116,7 +116,9 @@ body { margin: 0; }
 
 /* ── pages with a form and a list (src/pages/Tasks.jsx) ──────────────────── */
 
-.app-page { max-width: 860px; }
+/* Full width: a screen decides its own width in the designer (Size → Width),
+   and a cap here would quietly overrule it. */
+.app-page { max-width: none; }
 .app-page h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.02em; }
 .app-page-lead { margin: 0 0 24px; color: var(--xeplr-text-muted); font-size: 14px; }
 
