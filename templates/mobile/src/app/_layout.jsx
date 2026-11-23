@@ -14,6 +14,7 @@ import { CameraView, Camera } from 'expo-camera'
 import { hydrateStorage, startSession, useSession } from '@xeplr/ui-account/native'
 import { NativeHostProvider, NativeInsets, NativeTheme, DARK, LIGHT, useNativeTheme } from '@xeplr/ui-factory/native'
 import { APP_NAME, BUILT_IN_SERVER, devServer } from '../lib/app.js'
+__MT_MOBILE_IMPORTS__
 
 const PICKERS = { ImagePicker, DocumentPicker, DateTimePicker, DateTimePickerAndroid, CameraView, Camera }
 
@@ -23,6 +24,7 @@ function Frame() {
   const { signedIn, server } = useSession()
   const segments = useSegments()
   if (!signedIn && segments[0] !== 'login') return <Redirect href="/login" />
+__MT_MOBILE_GATE__
   return (
     <NativeInsets value={insets}>
       <NativeHostProvider modules={PICKERS} baseUrl={server} appName={APP_NAME}>
@@ -39,7 +41,11 @@ export default function RootLayout() {
   const [failed, setFailed] = useState(null)
   useEffect(() => {
     hydrateStorage({ AsyncStorage, prefix: '__NAME__', web: Platform.OS === 'web' })
-      .then(() => { startSession({ builtInServer: BUILT_IN_SERVER, suggested: devServer() }); setReady(true) }, (e) => setFailed(e.message || 'Could not start'))
+      .then(() => {
+__MT_MOBILE_REGISTER__
+        startSession({ builtInServer: BUILT_IN_SERVER, suggested: devServer() })
+        setReady(true)
+      }, (e) => setFailed(e.message || 'Could not start'))
   }, [])
   if (failed) return <View style={{ flex: 1, padding: 24, justifyContent: 'center' }}><Text>{failed}</Text></View>
   if (!ready) return null
