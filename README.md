@@ -50,6 +50,7 @@ Already working, with nothing to wire up:
   It follows the app's tenancy (none, or the levels you chose) and never creates
   companies or workspaces of its own. Approvals (another person's turn) are not
   part of it.
+- **A phone app** — `mobile/` (Expo): the same app drawn natively on Android and iOS — every form added to the menu, its list, add / edit, its buttons and the journeys — with no screen code of its own: it draws what the server holds (`@xeplr/ui-factory/native`, `@xeplr/ui-account/native`). Try it with Expo Go, build an APK with `npm run build:apk`. Written only for apps whose data is not split by company: picking a company on a phone is not built yet.
 - **Functions** — `api/functions/`: the app's own code, registered with
   `@xeplr/actions` by the event it is for (`beforeSave`, `afterSave`, …,
   `decide`) and picked by name in a screen's events or a flow step. Two to start
