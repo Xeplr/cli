@@ -262,6 +262,15 @@ If a screen *nearly* says what you need, ask for the control to be added to
 
 ---
 
+## On a phone
+
+`mobile/` is this app on a phone (Expo), drawn **natively**, with no screen
+code of its own: the menu is whatever Configure UI → Menu shows this person,
+each form's list and add / edit, its buttons and journeys. So everything in
+steps 1–6 is on the phone as soon as it is published — no change there, no new
+build. Designing stays on a computer. `mobile/README.md` says how to try it
+(Expo Go) and build an APK.
+
 ## With Claude
 
 Every step above can also be asked for. Open Claude in this folder:

@@ -749,3 +749,28 @@ test('the form designer hands the builder both screens WITH their documents, so 
   assert.match(src, /factory\.loadDraft\(form \+ p\.suffix\)/);
   assert.match(src, /document: documents\[p\.part\]/);
 });
+
+test('a plain app gets a phone app (mobile/) with its name filled in; a multi-tenant one does not', function () {
+  var dir = path.join(tmpdir(), 'demo');
+  generate.generate(answers(), dir);
+  var read = function (rel) { return fs.readFileSync(path.join(dir, rel), 'utf8'); };
+  ['mobile/package.json', 'mobile/app.json', 'mobile/eas.json', 'mobile/metro.config.js', 'mobile/.gitignore', 'mobile/README.md',
+   'mobile/src/lib/app.js', 'mobile/src/app/_layout.jsx', 'mobile/src/app/login.jsx', 'mobile/src/app/index.jsx',
+   'mobile/src/app/forms/[form]/index.jsx', 'mobile/src/app/forms/[form]/[id].jsx', 'mobile/src/app/flows/index.jsx', 'mobile/src/app/journey/[flow].jsx'
+  ].forEach(function (f) { assert.ok(fs.existsSync(path.join(dir, f)), f + ' is written'); });
+  var app = JSON.parse(read('mobile/app.json')).expo;
+  assert.equal(app.name, 'Demo');
+  assert.equal(app.slug, 'demo');
+  assert.equal(app.android.package, 'com.example.demo');
+  assert.match(read('mobile/src/lib/app.js'), /APP_NAME = 'Demo'/);
+  assert.match(read('mobile/src/app/_layout.jsx'), /prefix: 'demo'/);
+  assert.match(read('mobile/src/lib/app.js'), /:\d+`/, 'the dev server is the web app\'s own port');
+  var all = ['mobile/package.json', 'mobile/app.json', 'mobile/src/lib/app.js', 'mobile/src/app/_layout.jsx', 'mobile/README.md'].map(read).join('\n');
+  assert.doesNotMatch(all, /__[A-Z_]+__/, 'no token left behind');
+  // Screens are never written here: the phone draws what the server holds.
+  assert.doesNotMatch(read('mobile/src/app/forms/[form]/index.jsx'), /screen=\{?['"]/);
+
+  var mt = path.join(tmpdir(), 'demo');
+  generate.generate(answers({ tenancy: questions.tenancyLevels('company') }), mt);
+  assert.ok(!fs.existsSync(path.join(mt, 'mobile')), 'no phone app until a company can be picked on one');
+});
