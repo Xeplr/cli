@@ -52,9 +52,11 @@ Designing (Configure UI) and the admin screens stay on a computer.
 | **Dates** | the phone's own date picker |
 | **Journeys** | Start, then each screen with **Next**, as on the website |
 
-Not on the phone: a `table` or `subform` control (they say so and point to a
-computer), Configure UI, the admin screens, and apps whose data is split by
-company (picking a company on a phone is not built yet).
+Every control a form can hold is on the phone — a `table` as a card per row
+with a tick, a `subform` drawn inside its form. When the app's data is split by
+company, the first page after signing in is choosing it (and the workspace),
+as on the website; **Switch company** is on the menu. Designing (Configure UI)
+and the admin screens are for a computer.
 
 ## Layout
 

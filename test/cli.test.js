@@ -717,7 +717,8 @@ test('with tenancy, the company picker is listed as web only and the JSON stays 
   a.tenancy = [{ key: 'l1', name: 'companyId', header: 'x-company-id', label: 'Company' }];
   generate.generate(a, dir);
   var pages = JSON.parse(fs.readFileSync(path.join(dir, 'ui/pages.json'), 'utf8'));
-  assert.ok(pages.webOnly.some(function (p) { return p.path === '/select' && p.menu === 'Switch company'; }));
+  assert.ok(pages.documents.some(function (p) { return p.path === '/select' && p.menu === 'Switch company'; }), 'the company picker is on the phone too');
+  assert.ok(!pages.webOnly.some(function (p) { return p.path === '/select' || p.path === '/flows'; }), 'neither the picker nor the journeys are web only');
 });
 
 test('BUILDING.md maps every step — click or code — and names every function event where the designer picks it', function () {
@@ -750,7 +751,7 @@ test('the form designer hands the builder both screens WITH their documents, so 
   assert.match(src, /document: documents\[p\.part\]/);
 });
 
-test('a plain app gets a phone app (mobile/) with its name filled in; a multi-tenant one does not', function () {
+test('every app gets a phone app (mobile/) with its name filled in — a multi-tenant one with its company picker', function () {
   var dir = path.join(tmpdir(), 'demo');
   generate.generate(answers(), dir);
   var read = function (rel) { return fs.readFileSync(path.join(dir, rel), 'utf8'); };
@@ -770,7 +771,16 @@ test('a plain app gets a phone app (mobile/) with its name filled in; a multi-te
   // Screens are never written here: the phone draws what the server holds.
   assert.doesNotMatch(read('mobile/src/app/forms/[form]/index.jsx'), /screen=\{?['"]/);
 
+  assert.ok(!fs.existsSync(path.join(dir, 'mobile/src/app/select.jsx')) && !/TENANCY|registerMTs|scopeChosen/.test(read('mobile/src/lib/app.js') + read('mobile/src/app/_layout.jsx') + read('mobile/src/app/index.jsx')), 'a plain app: no trace of tenancy on the phone either');
+
   var mt = path.join(tmpdir(), 'demo');
-  generate.generate(answers({ tenancy: questions.tenancyLevels('company') }), mt);
-  assert.ok(!fs.existsSync(path.join(mt, 'mobile')), 'no phone app until a company can be picked on one');
+  generate.generate(answers({ tenancy: questions.tenancyLevels('company, workspace') }), mt);
+  var mtRead = function (rel) { return fs.readFileSync(path.join(mt, rel), 'utf8'); };
+  var levels = JSON.parse(/export const TENANCY = ([\s\S]*)\n?$/.exec(mtRead('mobile/src/lib/app.js'))[1]).levels;
+  assert.deepStrictEqual(levels.map(function (l) { return l.key; }), ['l1', 'l2'], 'a multi-tenant app\'s phone app knows its levels');
+  assert.match(mtRead('mobile/src/app/select.jsx'), /NativeScopePicker levels=\{TENANCY\.levels\}/);
+  assert.match(mtRead('mobile/src/app/_layout.jsx'), /registerMTs\(TENANCY\.slots\)/);
+  assert.match(mtRead('mobile/src/app/_layout.jsx'), /scopeChosen\(TENANCY\.levels\)/);
+  assert.match(mtRead('mobile/src/app/index.jsx'), /Switch company/);
+  assert.match(mtRead('ui/src/pages/SelectScope.jsx'), /useScopeChoice\(\{ levels: tenancy\.levels \}\)/, 'the web picker is the same logic, drawn');
 });

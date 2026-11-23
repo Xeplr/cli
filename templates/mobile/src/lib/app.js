@@ -28,3 +28,14 @@ export function devServer() {
 // when they are made, so one of each is enough.
 export const factory = createFactoryApi({ fetch: authFetch, fetchFile: authFetchFile, base: '/api' })
 export const flows = createFlowsApi({ fetch: authFetch, base: '/api/workflow' })
+
+/**
+ * The app's own pages that are drawn from a form, by their menu key — on the
+ * phone as that form's list. Forms added in Configure UI need nothing here;
+ * a page added in code with its own menu key is listed like Tasks.
+ */
+export const PAGES = {
+  Tasks: { form: 'task' }
+}
+
+__MT_MOBILE_TENANCY__

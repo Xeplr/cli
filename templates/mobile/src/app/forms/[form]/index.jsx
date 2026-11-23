@@ -3,13 +3,13 @@ import { useCallback, useState } from 'react'
 import { Stack, router, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { useSession } from '@xeplr/ui-account/native'
 import { NativeFormRecords, phoneMenu } from '@xeplr/ui-factory/native'
-import { factory } from '../../../lib/app.js'
+import { factory, PAGES } from '../../../lib/app.js'
 
 export default function FormRecords() {
   const { form } = useLocalSearchParams()
   const { access } = useSession()
   const key = String(form)
-  const item = phoneMenu(access).find((m) => m.form === key)
+  const item = phoneMenu(access, { pages: PAGES }).find((m) => m.form === key)
   // Coming back from a record reads the list again: what was done there shows here.
   const [tick, setTick] = useState(0)
   useFocusEffect(useCallback(() => { setTick((n) => n + 1) }, []))

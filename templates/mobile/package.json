@@ -13,8 +13,8 @@
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/datetimepicker": "9.2.1",
-    "@xeplr/ui-account": "^1.7.0",
-    "@xeplr/ui-factory": "^1.20.0",
+    "@xeplr/ui-account": "^1.8.0",
+    "@xeplr/ui-factory": "^1.21.0",
     "expo": "~58.0.26",
     "expo-build-properties": "~58.0.12",
     "expo-camera": "~58.0.14",
