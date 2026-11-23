@@ -8,8 +8,9 @@
 // description and what the event hands it — the code stays here, and runs on
 // the server. BUILDING.md, at the project's root, has a recipe for each.
 //
-// The screen's own events — picked in Configure UI → Flows → a step → Events
-// & navigation (or a screen's `events` in its .screen.json):
+// The screen's own events — picked in the form's designer, nothing selected →
+// Server rules (or in a flow step's Events & navigation, or a screen's `events`
+// in its .screen.json):
 //
 //   event          runs                                   ctx adds              return
 //   beforeLoad     before records are read                query (narrow it)     nothing, or a new query

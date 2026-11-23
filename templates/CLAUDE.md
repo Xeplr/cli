@@ -44,7 +44,7 @@ Then change only what the request asks for:
 | suggestions as someone types | an `autocomplete` field whose `suggestFrom` names a `suggest` function |
 | a checklist inside a button's popup | an `ask.fields` entry of `type: "checklist"` whose `optionsFrom` names a `buttonOptions` function |
 | hide / filter rows on screen, fill in a value before saving, check something before Next moves on | front-end hooks — `ui/src/pages/Edit<Form>.jsx` (`get`, `save`, `delete`, `step`). Browser only: say so if it matters on a phone |
-| must / only if / check against / email when / only managers see | a server function — registered in `api/screens/<form>/<form>.functions.js` with its `event`, then named in `<form>-edit.screen.json`'s `events` (or picked in Configure UI → Flows → Events). Register before naming: a screen naming an unregistered function is refused at publish |
+| must / only if / check against / email when / only managers see | a server function — registered in `api/screens/<form>/<form>.functions.js` with its `event`, then named in `<form>-edit.screen.json`'s `events` (or picked in the form designer → Server rules). Register before naming: a screen naming an unregistered function is refused at publish |
 | store as / convert / comma-separated ↔ array / work out X from Y | server model — `api/screens/<form>/<form>.model.js` |
 | a query in your own server code | `factory.table('<forms table>')` — this company, active rows, the model applied |
 

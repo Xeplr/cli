@@ -145,11 +145,11 @@ shows on that field.
 | **What is known about a record** — its products, contact, delivery | `recordDetails` | a **Details** control (Data → Details) → **Details from** | `ctx.record`, `ctx.id`, `ctx.query.more` | `{ sections: [{ title, rows: [{ label, text }] }] }` |
 | **Comments and history** on a record | `feedEntries` | a **Comments & history** control → **Entries from** | `ctx.record`, `ctx.id` | `[{ id, kind: 'comment' \| 'event', text, author?, at? }]` |
 | **Suggestions as someone types** — a product from the shop | `suggest` | an **Autocomplete** field → **Suggestions from** | `ctx.query.q` | `[{ value, label?, sub?, fill? }]` |
-| **A rule on save** — must / only if / check against, or work a value out | `beforeSave` | Configure UI → Flows → a flow with the form → its step → **Events & navigation** — saved to the form itself, so it runs everywhere | `ctx.values`, `ctx.isNew`, `ctx.previous` | the values to save; or `ctx.reject(…)` |
-| **Something after a save** — an email, another record | `afterSave` | the same place | `ctx.result` (the saved row), `ctx.isNew` | — |
-| **Only some rows** — a person sees their own | `beforeLoad` | the same place | `ctx.query` (narrow it) | — |
-| **A check before delete** | `beforeDelete` | the same place | `ctx.previous` | — (or `ctx.reject`) |
-| **When load / save / delete failed** | `onError` | the same place | `ctx.error` | — |
+| **A rule on save** — must / only if / check against, or work a value out | `beforeSave` | the form's designer, nothing selected → **Server rules** → **Before save** — it runs wherever the form is used | `ctx.values`, `ctx.isNew`, `ctx.previous` | the values to save; or `ctx.reject(…)` |
+| **Something after a save** — an email, another record | `afterSave` | Server rules → **After save** | `ctx.result` (the saved row), `ctx.isNew` | — |
+| **Only some rows** — a person sees their own | `beforeLoad` | Server rules → **Before load** | `ctx.query` (narrow it) | — |
+| **A check before delete** | `beforeDelete` | Server rules → **Before delete** | `ctx.previous` | — (or `ctx.reject`) |
+| **When load / save / delete failed** | `onError` | Server rules → **On error** | `ctx.error` | — |
 | **Where a flow goes next** | `decide` | Configure UI → Flows → a step → **Let a function decide** | `ctx.values`, `ctx.targets` | one of `ctx.targets` |
 
 Every `ctx` also has `user`, `access` (`{ roles }`), `tenant`, `knex` (the
