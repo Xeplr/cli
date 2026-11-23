@@ -7,6 +7,8 @@ Read `api/node_modules/@xeplr/ui-factory/AUTHORING.md` for what screens, functio
 
 **Before changing any screen or button, read the "Screens and buttons — the rules" section of `ui/node_modules/@xeplr/ui-factory/README.md` and follow it.** In short: a screen is a document; a button is a registered function and its parameters; a page written by hand is web only, listed in `ui/pages.json` with the reason — and before writing one, say so and ask whether to add the missing control to the factory instead.
 
+**`BUILDING.md` is the whole map for people:** every step of building this app, which ones are clicks in Configure UI and which need a function in `api/`, every function event and where the designer picks it. Keep it true when you change what the app can do.
+
 ## Create a new UI
 
 A new UI is a **form**: a list, and an add / edit form it opens — on a page of its own (like Tasks) or in a popup — saved in its own table. Use the singular for `<form>` (`farming_department`), the plural for the page (`FarmingDepartments`).
@@ -35,7 +37,12 @@ Then change only what the request asks for:
 |---|---|
 | a field, label, rule, dropdown, layout, colour | the screen JSON → validate → publish in Configure UI → Forms (or, never published yet, restart the API) |
 | a button that does something to a record — set a status, confirm, approve | a **Buttons** control in the screen JSON naming a server function (`event: 'button'`, with an `inputSchema` — `options` for the values allowed) and its `params`; the function in `<form>.functions.js`. Several buttons that differ only by a value are ONE function |
-| a list whose rows are worked out, a search box, filter chips with counts | a list with `rowsFrom` naming a server function (`event: 'listRows'`) that returns `{ rows, counts }` — it writes the text the list shows |
+| a list whose rows are worked out, a search box, filter chips with counts, KPI cards, a date range | a list with `rowsFrom` naming a server function (`event: 'listRows'`) that returns `{ rows, counts, kpis }` — it writes the text the list shows |
+| a hover box on a list cell | the column's `details` naming a `rowDetails` function |
+| what is known about a record (its products, contact, delivery) | a `details` control whose `detailsFrom` names a `recordDetails` function |
+| comments and history on a record | a `feed` control whose `entriesFrom` names a `feedEntries` function |
+| suggestions as someone types | an `autocomplete` field whose `suggestFrom` names a `suggest` function |
+| a checklist inside a button's popup | an `ask.fields` entry of `type: "checklist"` whose `optionsFrom` names a `buttonOptions` function |
 | hide / filter rows on screen, fill in a value before saving, check something before Next moves on | front-end hooks — `ui/src/pages/Edit<Form>.jsx` (`get`, `save`, `delete`, `step`). Browser only: say so if it matters on a phone |
 | must / only if / check against / email when / only managers see | a server function — registered in `api/screens/<form>/<form>.functions.js` with its `event`, then named in `<form>-edit.screen.json`'s `events` (or picked in Configure UI → Flows → Events). Register before naming: a screen naming an unregistered function is refused at publish |
 | store as / convert / comma-separated ↔ array / work out X from Y | server model — `api/screens/<form>/<form>.model.js` |
@@ -45,7 +52,7 @@ Then change only what the request asks for:
 
 ### The controls a field can be
 
-`text` (default), `textarea`, `number`, `date`, `datetime`, `checkbox`, `dropdown`, `radio`, `multiselect`, `file`, plus `stepper` and `label`. The sample uses every one — read `api/screens/task/task.entity.json` for how each is written. Three are worth knowing about:
+`text` (default), `textarea`, `number`, `date`, `datetime`, `checkbox`, `dropdown`, `radio`, `multiselect`, `file`, plus `stepper` and `label`. A screen can also hold controls that are not fields — `autocomplete`, `list`, `buttons`, `details`, `feed`, `table`, `subform`, `tiles` — see "Controls" in the ui-factory README. The sample uses every field type — read `api/screens/task/task.entity.json` for how each is written. Three are worth knowing about:
 
 - **`multiselect`** — several ids in ONE text column, comma separated, and an array in your code. An option's id may not contain a comma.
 - **`file`** — the column holds the **path**, never the file. Say which extensions (`"accept": ".pdf,.docx"`) and how large (`"maxSize": 10`, in MB); the API enforces both, by extension, and keeps the file in the company's own folder under `XEPLR_DATA_DIR` (`screens/<table>/`). Uploading needs `multer` in `api/` (already in package.json).
