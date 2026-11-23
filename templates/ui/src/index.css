@@ -178,6 +178,7 @@ body { margin: 0; }
   cursor: pointer;
 }
 .app-btn:disabled { opacity: 0.55; cursor: default; }
+a.app-btn { display: inline-block; text-decoration: none; line-height: normal; }
 .app-btn-quiet {
   background: transparent;
   border-color: var(--xeplr-border-primary);
@@ -301,7 +302,8 @@ body { margin: 0; }
 .app-forms-field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 220px; font-size: 12px; color: var(--xeplr-text-muted); }
 
 .app-menu-label,
-.app-forms-new input {
+.app-forms-new input,
+.app-forms-new select {
   flex: 1;
   padding: 9px 11px;
   border-radius: 6px;
@@ -402,7 +404,7 @@ body { margin: 0; }
   .app-field-row { flex-direction: column; gap: 0; }
   .app-field input, .app-field textarea, .app-field select { font-size: 16px; min-height: 44px; }
   .app-forms-field { min-width: 0; flex-basis: 100%; }
-  .app-menu-label, .app-forms-new input { font-size: 16px; min-height: 44px; box-sizing: border-box; }
+  .app-menu-label, .app-forms-new input, .app-forms-new select { font-size: 16px; min-height: 44px; box-sizing: border-box; }
   .app-btn { min-height: 44px; }
   .app-row-actions .app-btn { min-height: 40px; padding: 8px 12px; }
 
