@@ -6,6 +6,7 @@ An xeplr application, created by [`@xeplr/cli`](https://www.npmjs.com/package/@x
 __NAME__/
 ├─ api/        the API and the sign-in service          → api/README.md
 ├─ ui/         the React app                           → ui/README.md
+├─ BUILDING.md every step of building the app: what is a click, what needs a function
 └─ CLAUDE.md   how to change this app — for Claude, and a good read for people
 ```
 
@@ -66,6 +67,11 @@ Every one of these checks the same sign-in token, so one login covers them all.
 - **Functions** — `api/functions/`: your code, registered by event and picked by name in a screen's events or a flow step (see "Functions" below).
 
 ## Create a new UI
+
+**[`BUILDING.md`](BUILDING.md) is the step-by-step guide** — masters, forms,
+the menu, roles and flows by clicking; buttons, worked-out lists, rules and
+emails as a function you write in `api/functions/` and then pick from a
+dropdown in the designer; and what still needs a page written by hand.
 
 - **Without code** — Configure UI → Forms → New form → design → Publish → Add to menu.
 - **With Claude** — open Claude in this folder and give it (change the name and the fields):

@@ -60,6 +60,7 @@ Already working, with nothing to wire up:
   and choosing one is the first screen after signing in.
 - **A welcome screen** that checks it can reach everything and tells you which
   files to change first.
+- **`BUILDING.md`** — every step of building the app, click or code (see below).
 - **READMEs** at the project root and in `api/` and `ui/`: how to start it,
   every command, where things live, and the rules the app follows.
 - **A `CLAUDE.md`** that tells Claude how to create a new UI in this app — the
@@ -145,6 +146,27 @@ a package name).
 `api` and `ui`, and `npm run setup` in `api`, yourself. If set-up stops part
 way (Postgres not running, say), the installer says which step and the command
 to run again.
+
+## Building the app — what is a click, what is code
+
+Every generated project has a **`BUILDING.md`** at its root: every step of
+growing it into a full application, each marked as a **click** in Configure UI
+or **code**.
+
+- **Clicks** — masters, forms and their lists (publishing creates the tables),
+  the side rail, users and roles, flows.
+- **Code, then a click** — everything a screen *does*: buttons, lists worked out
+  from several tables (with chips, KPI cards and a date range), a record's
+  details and comments, suggestions as you type, rules on save, emails after.
+  Each is a function in `api/functions/`, registered with `@xeplr/actions`
+  under the event it is for; the designer then offers it in a dropdown in the
+  right place (a button's **Runs**, a list's **Rows from**, …). The guide lists
+  all thirteen events, where each is picked, what it gets and returns, with a
+  recipe for the common ones.
+- **Still a page written by hand** — a screen that is not a form and its list
+  (a record's own view, a Home with tiles), a record on its own page, fields
+  that show or hide as another changes, charts, approvals, addresses of your
+  own. Each is named, with what to write.
 
 ## Creating a new UI
 

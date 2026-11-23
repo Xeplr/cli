@@ -719,3 +719,25 @@ test('with tenancy, the company picker is listed as web only and the JSON stays 
   var pages = JSON.parse(fs.readFileSync(path.join(dir, 'ui/pages.json'), 'utf8'));
   assert.ok(pages.webOnly.some(function (p) { return p.path === '/select' && p.menu === 'Switch company'; }));
 });
+
+test('BUILDING.md maps every step — click or code — and names every function event where the designer picks it', function () {
+  var dir = path.join(tmpdir(), 'demo');
+  generate.generate(answers(), dir);
+  var read = function (rel) { return fs.readFileSync(path.join(dir, rel), 'utf8'); };
+  var guide = read('BUILDING.md');
+  assert.match(guide, /^# Building demo, step by step/);
+  assert.doesNotMatch(guide, /__[A-Z_]+__/, 'no token left behind');
+  // The events @xeplr/factory runs: the screen's own, a flow's, and its controls'.
+  var events = ['beforeLoad', 'beforeSave', 'afterSave', 'beforeDelete', 'onError', 'decide',
+    'button', 'buttonOptions', 'listRows', 'rowDetails', 'recordDetails', 'feedEntries', 'suggest'];
+  events.forEach(function (e) {
+    assert.ok(guide.indexOf('`' + e + '`') !== -1, 'BUILDING.md names ' + e);
+    assert.ok(read('api/functions/index.js').indexOf(e) !== -1, 'api/functions/index.js names ' + e);
+    assert.ok(read('README.md').indexOf('`' + e + '`') !== -1, 'README.md names ' + e);
+  });
+  ['**Click**', '**Code**', 'Runs', 'Rows from', 'Details from', 'Entries from', 'Suggestions from', 'Hover box from', 'webOnly'].forEach(function (s) {
+    assert.ok(guide.indexOf(s) !== -1, 'BUILDING.md says ' + s);
+  });
+  assert.match(read('README.md'), /\[`BUILDING\.md`\]\(BUILDING\.md\)/);
+  assert.match(read('CLAUDE.md'), /`BUILDING\.md` is the whole map for people/);
+});
