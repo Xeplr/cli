@@ -26,7 +26,7 @@ The API (`@xeplr/base-apis`) and the sign-in service (`@xeplr/auth`), with this 
 | `routes/access.js` | who may design and publish forms (Super Admin) |
 | `screens/` | the forms this app ships with: per form, its spec, list and edit screens, server functions and model — registered in `screens/index.js` |
 | `functions/` | this app's functions — the code screens' events and flows' `decide` pick by name — registered with `@xeplr/actions` by event, loaded at startup |
-| `workflow.js` | flows: `@xeplr/workflow-api` started inside this API, in its own database (`DB_WORKFLOW`) |
+| `workflow.js` | flows: `@xeplr/workflow-api` started inside this API, in its own database (`DB_WORKFLOW`), with its clock — `@xeplr/jobs`' scheduler, in a database of its own (`DB_JOBS`): a flow's schedules and timed work run as jobs, never on a timer of the app's own |
 | `data/` | `XEPLR_DATA_DIR` in development: every file the app keeps, a folder per company — what people attach through a form's **file** field is in `<company>/screens/`. Never committed, and never served: a file comes back only through the API's own route, which checks the caller the way reading a record does |
 | `migrations/` | hand-written SQL for tables no form owns |
 | `migrations-auth/` | this app's rows in the sign-in database — menus (by key), permissions |
@@ -40,6 +40,7 @@ The API (`@xeplr/base-apis`) and the sign-in service (`@xeplr/auth`), with this 
 | `XEPLR_DATA_DIR` | **required, absolute, existing**: where every file the app keeps lives, a folder per company (`<root>/__NAME__/<company>/…`). Generated as `api/data`; on a server, somewhere backed up |
 | `__PREFIX___CONNECTION`, `AUTH_DB_CONNECTION_INFO_ENCRYPTED` | the database, encrypted — `npm run db:encrypt` |
 | `DB_API`, `AUTH_DB_NAME` | the two database names — never guessed |
+| `DB_WORKFLOW`, `DB_JOBS` | flows' database, and the jobs that are their clock — named by `@xeplr/workflow-api` and `@xeplr/jobs`, created and migrated on first start, never guessed |
 | `AUTH_SUPER_ADMIN_EMAIL` / `_PASSWORD` | the first account — created once, when the sign-in database is first set up |
 | `AUTH_TENANT_HEADER` | `none`: one set of roles for everyone. A multi-tenant app names its company header (e.g. `x-company-id`), so a role made inside a company belongs to it |
 | `AUTH_ACTIVATION_URL`, `AUTH_INVITE_URL`, `AUTH_RESET_URL` | the UI pages the emailed links open; the token is appended. The reset address is never taken from the request |

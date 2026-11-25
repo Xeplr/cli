@@ -28,7 +28,9 @@
     "multer": "^2.0.2",
     "nodemailer": "^10.0.2",
     "@xeplr/actions": "^2.2.1",
-    "@xeplr/workflow-api": "^2.1.0"
+    "@xeplr/workflow-api": "^3.0.0",
+    "@xeplr/workflow-engine": "^5.0.0",
+    "@xeplr/jobs": "^3.1.0"
   },
   "devDependencies": {
     "dotenv-cli": "^8.0.0",
