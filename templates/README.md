@@ -24,7 +24,9 @@ cd ui  && npm run dev            # the app           http://localhost:__UI_PORT_
 Open http://localhost:__UI_PORT__ and sign in as `__ADMIN_EMAIL__`.
 
 Flows (`@xeplr/workflow-api`) run **inside the API**, in a database of their
-own that the API creates on first start — nothing else to start.
+own that the API creates on first start — nothing else to start. Their clock,
+`@xeplr/jobs` (schedules, Wait boxes running out, reminders), starts with them,
+in a database of its own (`DB_JOBS`), also created on first start.
 
 ## Where each address goes
 

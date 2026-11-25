@@ -19,7 +19,7 @@ function answers(extra) {
     name: 'demo',
     prefix: 'DEMO',
     ports: { ui: 19200, auth: 19201, api: 19202 },
-    databases: { auth: 'demo_auth', api: 'demo_api', workflow: 'demo_workflow' },
+    databases: { auth: 'demo_auth', api: 'demo_api', workflow: 'demo_workflow', jobs: 'demo_jobs' },
     admin: { email: 'admin@demo.local', password: 'ChangeMe123' },
     secrets: { encryptionKey: 'k'.repeat(64), jwtSecret: 'j'.repeat(64) },
     connection: ''
@@ -236,7 +236,7 @@ test('every name the CLI allows gives database names @xeplr/db will create', fun
   // NAME_RE allows dashes and refuses underscores; ensureDatabase refuses
   // dashes. So "x-doit" once gave x-doit_auth and set-up died with
   // "Unsafe database name".
-  assert.deepStrictEqual(questions.databaseNames('x-doit'), { auth: 'x_doit_auth', api: 'x_doit_api', workflow: 'x_doit_workflow' });
+  assert.deepStrictEqual(questions.databaseNames('x-doit'), { auth: 'x_doit_auth', api: 'x_doit_api', workflow: 'x_doit_workflow', jobs: 'x_doit_jobs' });
   ['yyan', 'my-app', 'a1', 'smart-asset-management'].forEach(function (name) {
     var db = questions.databaseNames(name);
     assert.match(db.auth, questions.DB_NAME_RE, name + ' → ' + db.auth);
@@ -274,13 +274,14 @@ test('the wizard plans the workflow database and the plan shows it', async funct
   var a = await questions.collect(session, 'my-app');
   session.close();
 
-  assert.deepStrictEqual(a.databases, { auth: 'my_app_auth', api: 'my_app_api', workflow: 'my_app_workflow' });
+  assert.deepStrictEqual(a.databases, { auth: 'my_app_auth', api: 'my_app_api', workflow: 'my_app_workflow', jobs: 'my_app_jobs' });
   assert.deepStrictEqual(a.ports, { ui: 19300, auth: 19301, api: 19302 });
   assert.strictEqual(a.admin.email, 'admin@my-app.local');
   assert.ok(a.connection, 'the connection is encrypted into one setting');
 
   var text = plan.describe(a);
   assert.match(text, /my_app_workflow\s+flows and their runs/);
+  assert.match(text, /my_app_jobs\s+flows' schedules and timed work/);
   assert.match(text, /my_app_auth/);
 });
 
@@ -408,7 +409,6 @@ test('every app has flows, run by @xeplr/workflow-api inside the API, in a datab
   // (@xeplr/ui-workflow) is not here.
   var apiPkg = read('api/package.json');
   // At least these, within the same major: a newer minimum is fine.
-  atLeast(apiPkg, '@xeplr/workflow-api', '2.1.0');
   atLeast(apiPkg, '@xeplr/factory', '3.0.2');
   atLeast(apiPkg, '@xeplr/actions', '2.2.0');
   assert.doesNotMatch(apiPkg, /"@xeplr\/workflow"/, 'not the old private package');
@@ -425,6 +425,23 @@ test('every app has flows, run by @xeplr/workflow-api inside the API, in a datab
   assert.match(start, /access: true,/);
   assert.match(read('api/env.required.js'), /require\('@xeplr\/workflow-api'\)\.embedRequiredEnv/);
   assert.match(read('api/development.env'), /\nDB_WORKFLOW=demo_workflow\n/);
+
+  // ITS CLOCK — @xeplr/jobs, in a database of its own, never a timer of the
+  // app's: a flow's schedules and its due work are jobs.
+  atLeast(apiPkg, '@xeplr/workflow-api', '3.0.0');
+  atLeast(apiPkg, '@xeplr/jobs', '3.1.0');
+  atLeast(apiPkg, '@xeplr/workflow-engine', '5.0.0');
+  assert.match(start, /require\('@xeplr\/jobs'\)/);
+  assert.match(start, /engine\.jobActions\.forEach/);
+  assert.match(start, /database: process\.env\.DB_JOBS,/);
+  assert.match(start, /migrate: true,/);
+  assert.match(start, /keepSchedule: jobs\.keepSchedule/);
+  assert.match(start, /jobs\.startScheduler\(\)/);
+  assert.doesNotMatch(start, /setInterval/);
+  assert.match(read('api/env.required.js'), /require\('@xeplr\/jobs'\)\.requiredEnv/);
+  assert.match(read('api/development.env'), /\nDB_JOBS=demo_jobs\n/);
+  assert.match(read('README.md'), /DB_JOBS/);
+  assert.match(read('CLAUDE.md'), /never add a timer of your own/);
   assert.match(read('api/development.env'), /XEPLR_AUTH_MIGRATIONS=\.\/node_modules\/@xeplr\/factory\/migrations-auth,\.\/node_modules\/@xeplr\/workflow-api\/migrations-auth,\.\/migrations-auth/);
 
   // ONE WAY TO RUN IT: inside the API. No own-port mode, no second process.
@@ -490,6 +507,7 @@ test('every app has flows, run by @xeplr/workflow-api inside the API, in a datab
   var prod = read('api/production.env.example');
   assert.doesNotMatch(prod, /WORKFLOW_PORT/);
   assert.match(prod, /^DB_WORKFLOW=demo_workflow$/m);
+  assert.match(prod, /^DB_JOBS=demo_jobs$/m);
   assert.match(prod, /^ENCRYPTION_KEY=$/m, 'no secret in the example');
   assert.match(read('api/.gitignore'), /^development\.env$/m);
   assert.match(read('api/.gitignore'), /^production\.env$/m);

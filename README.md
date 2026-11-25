@@ -47,7 +47,9 @@ Already working, with nothing to wire up:
   screen, a function that decides, or the end. Walked at `/journey/<key>`, and
   resumable. Run by `@xeplr/workflow-api` **inside the API**, in a database of
   its own (`<name>_workflow`, created on first start) — nothing extra to start.
-  It follows the app's tenancy (none, or the levels you chose) and never creates
+  Its clock is `@xeplr/jobs`, started with it in a database of its own
+  (`<name>_jobs`): schedules and timed work (a Wait box running out, a
+  reminder) run as jobs. It follows the app's tenancy (none, or the levels you chose) and never creates
   companies or workspaces of its own. Approvals (another person's turn) are not
   part of it.
 - **A phone app** — `mobile/` (Expo): the same app drawn natively on Android and iOS — every form added to the menu, its list, add / edit, its buttons and the journeys — with no screen code of its own: it draws what the server holds (`@xeplr/ui-factory/native`, `@xeplr/ui-account/native`). Try it with Expo Go, build an APK with `npm run build:apk`. An app whose data is split by company asks for the company first, on the phone as on the web.
@@ -252,7 +254,12 @@ an app keeps its tables apart, and creates the database on first start), with
 `tenantTables: false` so it follows the app's tenancy rather than creating
 `companies` / `workspaces`, and `access: true` so each flows route checks the
 caller's permissions, which its `migrations-auth` grants (loaded through
-`XEPLR_AUTH_MIGRATIONS`). The designer is `@xeplr/ui-factory`'s
+`XEPLR_AUTH_MIGRATIONS`). Its clock is `@xeplr/jobs` (`api/workflow.js`): the
+engine runs no timer, so `workflow.js` registers the engine's `jobActions`,
+starts jobs in their own database (`DB_JOBS`, `<name>_jobs`, from jobs'
+`requiredEnv`, `init({ migrate: true })`), passes `keepSchedule` and `startJob`
+to `registerWorkflow`, and starts the jobs scheduler. The app has no jobs
+screens; the jobs only run. The designer is `@xeplr/ui-factory`'s
 `FlowDesignerPage`; the paid canvas designer (X-Flow) is not part of a
 generated app.
 

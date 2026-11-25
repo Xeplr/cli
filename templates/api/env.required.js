@@ -36,4 +36,8 @@ module.exports = [
   // Flows' own database (DB_WORKFLOW) — workflow is embedded in this API but
   // keeps its tables apart from yours. The library names it.
   ...require('@xeplr/workflow-api').embedRequiredEnv,
+
+  // Flows' clock (DB_JOBS): a flow's schedules and timed work run as jobs of
+  // @xeplr/jobs, in a database of their own. The library names it.
+  ...require('@xeplr/jobs').requiredEnv,
 ];
